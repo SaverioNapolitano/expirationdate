@@ -7,6 +7,13 @@ public class BoughtProduct extends Product {
     int quantity;
     LocalDate expirationDate;
 
+    public BoughtProduct() {
+        super("", "", LocalDate.now(), 0);
+        price = 0;
+        quantity = 0;
+        expirationDate = LocalDate.now();
+    }
+
     public double getPrice() {
         return price;
     }
