@@ -179,11 +179,12 @@ public class MainWindowController {
     void onCheckBoxChecked(ActionEvent event) {
         if(event.getSource() instanceof CheckBox checkBox){
             int index = shoppingListVBox.getChildren().indexOf(checkBox.getParent());
-            if(!checkBox.isSelected() && !checkBox.isIndeterminate()){
+            if(!checkBox.isSelected() && !checkBox.isIndeterminate()){ //unchecked
                 shoppingListVBox.getChildren().get(index).toBack();
             }
-            if(checkBox.isSelected() && !checkBox.isIndeterminate()){
+            if(checkBox.isSelected() && !checkBox.isIndeterminate()){ //checked
                 shoppingListVBox.getChildren().get(index).toFront();
+                onNewExpirationListButtonClicked(event);
             }
         }
     }
