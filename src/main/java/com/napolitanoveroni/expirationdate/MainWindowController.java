@@ -61,7 +61,7 @@ public class MainWindowController {
     }
 
     @FXML
-    void onCalendarExpirationListButtonClicked(ActionEvent event) {
+    void onCalendarExpirationListButtonClicked(ActionEvent ignoredEvent) {
         // TODO calendar integration
     }
 
@@ -73,7 +73,7 @@ public class MainWindowController {
         alert.showAndWait();
     }
     @FXML
-    void onDeleteExpirationListButtonClicked(ActionEvent event) {
+    void onDeleteExpirationListButtonClicked(ActionEvent ignoredEvent) {
         try {
             int selectedIndex = selectedIndex();
             expirationListTableView.getItems().remove(selectedIndex);
@@ -136,14 +136,14 @@ public class MainWindowController {
     }
 
     @FXML
-    void onRecipesExpirationListButtonClicked(ActionEvent event) {
+    void onRecipesExpirationListButtonClicked(ActionEvent ignoredEvent) {
         // TODO database connection with recipes
     }
 
     @FXML
     void onEnterShoppingTextField(ActionEvent event) {
         CheckBox newCheckBox = new CheckBox();
-
+        newCheckBox.setOnAction(this::onCheckBoxChecked);
         TextField newTextField = new TextField();
         GridPane.setMargin(newTextField, new Insets(0, 10, 0, 10));
         newTextField.setOnAction(this::onEnterShoppingTextField);
@@ -173,4 +173,11 @@ public class MainWindowController {
         }
     }
 
+    @FXML
+    void onCheckBoxChecked(ActionEvent event) {
+        if(event.getSource() instanceof CheckBox checkBox){
+            int index = shoppingListVBox.getChildren().indexOf(checkBox.getParent());
+            shoppingListVBox.getChildren().get(index).toFront(); //TODO handle uncheck (it has to go above)
+        }
+    }
 }

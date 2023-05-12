@@ -60,7 +60,7 @@
                      <content>
                         <VBox fx:id="shoppingListVBox">
                            <children>
-                              <GridPane fx:id="shoppingListGridPane" maxHeight="15360.0" maxWidth="15360.0" vgap="10.0">
+                              <GridPane fx:id="shoppingListGridPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" vgap="10.0">
                                  <columnConstraints>
                                     <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" />
                                     <ColumnConstraints hgrow="SOMETIMES" />
@@ -70,7 +70,7 @@
                                     <RowConstraints maxHeight="-Infinity" vgrow="SOMETIMES" />
                                  </rowConstraints>
                                  <children>
-                                    <CheckBox mnemonicParsing="false" />
+                                    <CheckBox mnemonicParsing="false" onAction="#onCheckBoxChecked" />
                                     <TextField maxWidth="1.7976931348623157E308" onAction="#onEnterShoppingTextField" GridPane.columnIndex="1">
                                        <GridPane.margin>
                                           <Insets left="10.0" right="10.0" />
