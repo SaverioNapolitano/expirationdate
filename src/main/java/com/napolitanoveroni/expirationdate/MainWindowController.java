@@ -5,8 +5,8 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.GridPane;
@@ -15,7 +15,6 @@ import javafx.stage.Modality;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
 public class MainWindowController {
 
@@ -33,9 +32,6 @@ public class MainWindowController {
     private GridPane shoppingListGridPane;
 
     ObservableList<BoughtProduct> expirationList;
-
-    public static final int NEW = 0;
-    public static final int EDIT = 1;
 
     @FXML
     public void initialize() {
@@ -133,7 +129,7 @@ public class MainWindowController {
     }
 
     @FXML
-    void onNewExpirationListButtonClicked(ActionEvent event) {
+    void onNewExpirationListButtonClicked(ActionEvent ignoredEvent) {
         BoughtProduct edited = actionOnProduct(new BoughtProduct());
         expirationList.add(edited);
     }
@@ -141,6 +137,22 @@ public class MainWindowController {
     @FXML
     void onRecipesExpirationListButtonClicked(ActionEvent event) {
         // TODO database connection with recipes
+    }
+
+    @FXML
+    void onEnterShoppingTextField(ActionEvent event) {
+        CheckBox newCheckBox = new CheckBox();
+
+        TextField newTextField = new TextField();
+        GridPane.setMargin(newTextField, new Insets(0, 10, 0, 10));
+        newTextField.setOnAction(this::onEnterShoppingTextField);
+
+        Button newButton = new Button("Delete");    // TODO add graphic
+
+
+        shoppingListGridPane.addRow(shoppingListGridPane.getRowCount(), newCheckBox, newTextField, newButton);
+
+        newTextField.requestFocus();
     }
 
 }
