@@ -44,9 +44,7 @@ public class MainWindowController {
         expirationList = getBoughtProductData();
         expirationListTableView.setItems(expirationList);
         editableCols();
-        //expirationListTableView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue,
-                                                                                         //newValue) ->
-        // onExpirationListItemSelected(newValue));
+//        expirationListTableView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> onExpirationListItemSelected(newValue));
     }
 
     ObservableList<BoughtProduct> getBoughtProductData() {
@@ -61,11 +59,13 @@ public class MainWindowController {
         expirationListProductColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         expirationListProductColumn.setOnEditCommit(e->e.getTableView().getItems().get(e.getTablePosition().getRow()).setProductName(e.getNewValue()));
 
-        expirationListExpirationDateColumn.setCellFactory(ComboBoxTableCell.forTableColumn()); //TODO fix Date Picker
-        expirationListExpirationDateColumn.setOnEditCommit(e->e.getTableView().getItems().get(e.getTablePosition().getRow()).setExpirationDate(e.getNewValue()));
+        //expirationListExpirationDateColumn.setCellFactory(ComboBoxTableCell.forTableColumn()); //TODO fix Date Picker
+        //expirationListExpirationDateColumn.setOnEditCommit(e->e.getTableView().getItems().get(e.getTablePosition()
+        // .getRow()).setExpirationDate(e.getNewValue()));
 
         /* Allow for the values in each cell to be changeable */
-        expirationListTableView.setEditable(true);
+//        expirationListTableView.setEditable(true);
+        expirationListProductColumn.setEditable(true);
     }
 
     @FXML
