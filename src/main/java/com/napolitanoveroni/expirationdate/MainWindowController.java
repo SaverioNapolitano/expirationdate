@@ -6,10 +6,13 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 
 import java.io.IOException;
@@ -18,20 +21,18 @@ import java.util.NoSuchElementException;
 
 public class MainWindowController {
 
-    @FXML
-    private TableColumn<BoughtProduct, LocalDate> expirationListExpirationDateColumn;
+    @FXML private TableColumn<BoughtProduct, LocalDate> expirationListExpirationDateColumn;
 
-    @FXML
-    private TableColumn<BoughtProduct, String> expirationListProductColumn;
+    @FXML private TableColumn<BoughtProduct, String> expirationListProductColumn;
 
 
-    @FXML
-    private TableView<BoughtProduct> expirationListTableView;
+    @FXML private TableView<BoughtProduct> expirationListTableView;
 
-    @FXML
-    private GridPane shoppingListGridPane;
+    @FXML private GridPane shoppingListGridPane;
 
     ObservableList<BoughtProduct> expirationList;
+
+    @FXML private VBox shoppingListVBox;
 
     @FXML
     public void initialize() {
@@ -148,11 +149,28 @@ public class MainWindowController {
         newTextField.setOnAction(this::onEnterShoppingTextField);
 
         Button newButton = new Button("Delete");    // TODO add graphic
-
+        newButton.setOnAction(this::onDeleteShoppingListButtonClicked);
 
         shoppingListGridPane.addRow(shoppingListGridPane.getRowCount(), newCheckBox, newTextField, newButton);
+        GridPane newGridPane = new GridPane();
+        newGridPane.setPadding(new Insets(10, 10, 0, 10));
+        newGridPane.setAlignment(Pos.TOP_CENTER);
+        newGridPane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        newGridPane.setMinSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
+        newGridPane.setPrefSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
+        shoppingListVBox.getChildren().add(newGridPane);
+        newGridPane.addRow(newGridPane.getRowCount(), newCheckBox, newTextField, newButton);
+        newTextField.requestFocus(); //TODO resize newGridPane
+    }
 
-        newTextField.requestFocus();
+    @FXML
+    void onDeleteShoppingListButtonClicked(ActionEvent event) {
+        if(event.getSource() instanceof Button deleteButton){
+            shoppingListVBox.getChildren().remove(deleteButton.getParent());
+        }
+        if(shoppingListVBox.getChildren().size() == 0){
+            onEnterShoppingTextField(event);
+        }
     }
 
 }
