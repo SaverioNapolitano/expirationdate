@@ -61,10 +61,10 @@ public class MainWindowController {
         expirationListProductColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         expirationListProductColumn.setOnEditCommit(e->e.getTableView().getItems().get(e.getTablePosition().getRow()).setProductName(e.getNewValue()));
 
-        expirationListExpirationDateColumn.setCellFactory(ComboBoxTableCell.forTableColumn()); //TODO fix datepicker
+        expirationListExpirationDateColumn.setCellFactory(ComboBoxTableCell.forTableColumn()); //TODO fix Date Picker
         expirationListExpirationDateColumn.setOnEditCommit(e->e.getTableView().getItems().get(e.getTablePosition().getRow()).setExpirationDate(e.getNewValue()));
 
-        /* Allow for the values in each cell to be changable */
+        /* Allow for the values in each cell to be changeable */
         expirationListTableView.setEditable(true);
     }
 
@@ -104,24 +104,20 @@ public class MainWindowController {
 
     @FXML
     void onExpirationListItemSelected(BoughtProduct boughtProduct) {
-        actionOnProduct(EDIT);
-    }
+        int selectedIndex = selectedIndex();
+        BoughtProduct edited = actionOnProduct(expirationListTableView.getItems().get(selectedIndex));
 
-    public void actionOnProduct(int mode){
-        try {
+        expirationListTableView.getItems().set(selectedIndex, edited);
+
+        /*try {
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(getClass().getResource("EditBoughtProduct.fxml"));
             DialogPane view = loader.load();
             BoughtProductController controller = loader.getController();
 
-            int selectedIndex = 0;
-            if(mode == EDIT){
-                // Set the product into the controller.
-                selectedIndex = selectedIndex();
-                controller.setProduct(new BoughtProduct(expirationListTableView.getItems().get(selectedIndex)));
-            } else {
-                controller.setProduct(new BoughtProduct());
-            }
+            // Set the person into the controller.
+            int selectedIndex = selectedIndex();
+            controller.setProduct(new BoughtProduct(expirationListTableView.getItems().get(selectedIndex)));
 
             // Create the dialog
             Dialog<ButtonType> dialog = new Dialog<>();
@@ -132,22 +128,74 @@ public class MainWindowController {
             // Show the dialog and wait until the user closes it
             Optional<ButtonType> clickedButton = dialog.showAndWait();
             if (clickedButton.orElse(ButtonType.CANCEL) == ButtonType.APPLY) {
-                if(mode == EDIT){
-                    expirationListTableView.getItems().set(selectedIndex, controller.getProduct());
-                } else {
-                    expirationList.add(controller.getProduct());
-                }
+                expirationListTableView.getItems().set(selectedIndex, controller.getProduct());
             }
+        } catch (NoSuchElementException e) {
+            //TODO IMPLEMENT showNoProductSelectedAlert();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }*/
+    }
+
+    public BoughtProduct actionOnProduct(BoughtProduct initialValue) {
+        try {
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(getClass().getResource("EditBoughtProduct.fxml"));
+            DialogPane view = loader.load();
+            BoughtProductController controller = loader.getController();
+
+            controller.setProduct(initialValue);
+
+            // Create the dialog
+            Dialog<ButtonType> dialog = new Dialog<>();
+            dialog.setTitle("Edit Product");
+            dialog.initModality(Modality.WINDOW_MODAL);
+            dialog.setDialogPane(view);
+
+            // Show the dialog and wait until the user closes it
+            dialog.showAndWait();
+            return controller.getProduct();
         } catch (NoSuchElementException e) {
             showNoProductSelectedAlert();
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        throw new RuntimeException("Error while editing a product!");
     }
 
     @FXML
     void onNewExpirationListButtonClicked(ActionEvent event) {
-        actionOnProduct(NEW);
+        BoughtProduct edited = actionOnProduct(new BoughtProduct());
+        expirationList.add(edited);
+
+
+
+        /*try {
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(getClass().getResource("EditBoughtProduct.fxml"));
+            DialogPane view = loader.load();
+            BoughtProductController controller = loader.getController();
+
+            // Set the person into the controller.
+            controller.setProduct(new BoughtProduct());
+
+            // Create the dialog
+            Dialog<ButtonType> dialog = new Dialog<>();
+            dialog.setTitle("Edit Product");
+            dialog.initModality(Modality.WINDOW_MODAL);
+            dialog.setDialogPane(view);
+
+            // Show the dialog and wait until the user closes it
+            Optional<ButtonType> clickedButton = dialog.showAndWait();
+            if (clickedButton.orElse(ButtonType.CANCEL) == ButtonType.APPLY) {
+                expirationList.add(controller.getProduct());
+            }
+        } catch (NoSuchElementException e) {
+            //TODO IMPLEMENT showNoProductSelectedAlert();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }*/
     }
 
     @FXML
