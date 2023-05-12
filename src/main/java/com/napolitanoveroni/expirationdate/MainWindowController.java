@@ -23,18 +23,22 @@ import java.util.NoSuchElementException;
 
 public class MainWindowController {
 
-    @FXML private TableColumn<BoughtProduct, LocalDate> expirationListExpirationDateColumn;
+    @FXML
+    private TableColumn<BoughtProduct, LocalDate> expirationListExpirationDateColumn;
 
-    @FXML private TableColumn<BoughtProduct, String> expirationListProductColumn;
+    @FXML
+    private TableColumn<BoughtProduct, String> expirationListProductColumn;
 
+    @FXML
+    private TableView<BoughtProduct> expirationListTableView;
 
-    @FXML private TableView<BoughtProduct> expirationListTableView;
-
-    @FXML private GridPane shoppingListGridPane;
+    @FXML
+    private GridPane shoppingListGridPane;
 
     ObservableList<BoughtProduct> expirationList;
 
-    @FXML private VBox shoppingListVBox;
+    @FXML
+    private VBox shoppingListVBox;
 
     @FXML
     public void initialize() {
@@ -44,20 +48,19 @@ public class MainWindowController {
         expirationListTableView.setItems(expirationList);
         editableCols();
 
-//        expirationList.addListener(); TODO add listener to expirationList
+        //        expirationList.addListener(); TODO add listener to expirationList
     }
 
     ObservableList<BoughtProduct> getBoughtProductData() {
         ObservableList<BoughtProduct> boughtProducts = FXCollections.observableArrayList();
         // test product
-        boughtProducts.add(new BoughtProduct("alimentari colazione", "latte", LocalDate.now(), 1, 2, 1,
-                LocalDate.now()));  // only for test purpose, TODO database connection
+        boughtProducts.add(new BoughtProduct("alimentari colazione", "latte", LocalDate.now(), 1, 2, 1, LocalDate.now()));  // only for test purpose, TODO database connection
         return boughtProducts;
     }
 
-    private void editableCols(){
+    private void editableCols() {
         expirationListProductColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-        expirationListProductColumn.setOnEditCommit(e->e.getTableView().getItems().get(e.getTablePosition().getRow()).setProductName(e.getNewValue()));
+        expirationListProductColumn.setOnEditCommit(e -> e.getTableView().getItems().get(e.getTablePosition().getRow()).setProductName(e.getNewValue()));
 
         expirationListProductColumn.setEditable(true);
     }
@@ -74,6 +77,7 @@ public class MainWindowController {
         alert.setContentText("Please select a product in the table.");
         alert.showAndWait();
     }
+
     @FXML
     void onDeleteExpirationListButtonClicked(ActionEvent ignoredEvent) {
         try {
@@ -86,6 +90,7 @@ public class MainWindowController {
 
     /**
      * Returns the index of the selected person in the TableView component
+     *
      * @return the index of the selected person
      */
     int selectedIndex() {
@@ -167,22 +172,22 @@ public class MainWindowController {
 
     @FXML
     void onDeleteShoppingListButtonClicked(ActionEvent event) {
-        if(event.getSource() instanceof Button deleteButton){
+        if (event.getSource() instanceof Button deleteButton) {
             shoppingListVBox.getChildren().remove(deleteButton.getParent());
         }
-        if(shoppingListVBox.getChildren().size() == 0){
+        if (shoppingListVBox.getChildren().size() == 0) {
             onEnterShoppingTextField(event);
         }
     }
 
     @FXML
     void onCheckBoxChecked(ActionEvent event) {
-        if(event.getSource() instanceof CheckBox checkBox){
+        if (event.getSource() instanceof CheckBox checkBox) {
             int index = shoppingListVBox.getChildren().indexOf(checkBox.getParent());
-            if(!checkBox.isSelected() && !checkBox.isIndeterminate()){ //unchecked
+            if (!checkBox.isSelected() && !checkBox.isIndeterminate()) { //unchecked
                 shoppingListVBox.getChildren().get(index).toBack();
             }
-            if(checkBox.isSelected() && !checkBox.isIndeterminate()){ //checked
+            if (checkBox.isSelected() && !checkBox.isIndeterminate()) { //checked
                 shoppingListVBox.getChildren().get(index).toFront();
                 onNewExpirationListButtonClicked(event);
             }
@@ -192,11 +197,11 @@ public class MainWindowController {
     @FXML
     void onClearButtonClicked(ActionEvent ignoredEvent) {
         ObservableList<Node> children = shoppingListVBox.getChildren();
-        for(ListIterator<Node> nodeListIterator = children.listIterator(); nodeListIterator.hasNext();){
+        for (ListIterator<Node> nodeListIterator = children.listIterator(); nodeListIterator.hasNext(); ) {
             Node child = nodeListIterator.next();
-            if(child instanceof GridPane gridPane){
-                if(gridPane.getChildren().get(0) instanceof CheckBox checkBox){
-                    if(checkBox.isSelected() && !checkBox.isIndeterminate()){
+            if (child instanceof GridPane gridPane) {
+                if (gridPane.getChildren().get(0) instanceof CheckBox checkBox) {
+                    if (checkBox.isSelected() && !checkBox.isIndeterminate()) {
                         nodeListIterator.remove();
                     }
                 }

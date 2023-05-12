@@ -2,7 +2,7 @@ package com.napolitanoveroni.expirationdate;
 
 import java.time.LocalDate;
 
-public class Product extends Category{
+public class Product extends Category {
     String productName;
     LocalDate estimatedExpirationDate;
     double estimatedPrice;
