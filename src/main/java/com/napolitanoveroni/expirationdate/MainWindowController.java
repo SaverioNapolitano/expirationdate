@@ -108,33 +108,6 @@ public class MainWindowController {
         BoughtProduct edited = actionOnProduct(expirationListTableView.getItems().get(selectedIndex));
 
         expirationListTableView.getItems().set(selectedIndex, edited);
-
-        /*try {
-            FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(getClass().getResource("EditBoughtProduct.fxml"));
-            DialogPane view = loader.load();
-            BoughtProductController controller = loader.getController();
-
-            // Set the person into the controller.
-            int selectedIndex = selectedIndex();
-            controller.setProduct(new BoughtProduct(expirationListTableView.getItems().get(selectedIndex)));
-
-            // Create the dialog
-            Dialog<ButtonType> dialog = new Dialog<>();
-            dialog.setTitle("Edit Product");
-            dialog.initModality(Modality.WINDOW_MODAL);
-            dialog.setDialogPane(view);
-
-            // Show the dialog and wait until the user closes it
-            Optional<ButtonType> clickedButton = dialog.showAndWait();
-            if (clickedButton.orElse(ButtonType.CANCEL) == ButtonType.APPLY) {
-                expirationListTableView.getItems().set(selectedIndex, controller.getProduct());
-            }
-        } catch (NoSuchElementException e) {
-            //TODO IMPLEMENT showNoProductSelectedAlert();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
     }
 
     public BoughtProduct actionOnProduct(BoughtProduct initialValue) {
@@ -168,34 +141,6 @@ public class MainWindowController {
     void onNewExpirationListButtonClicked(ActionEvent event) {
         BoughtProduct edited = actionOnProduct(new BoughtProduct());
         expirationList.add(edited);
-
-
-
-        /*try {
-            FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(getClass().getResource("EditBoughtProduct.fxml"));
-            DialogPane view = loader.load();
-            BoughtProductController controller = loader.getController();
-
-            // Set the person into the controller.
-            controller.setProduct(new BoughtProduct());
-
-            // Create the dialog
-            Dialog<ButtonType> dialog = new Dialog<>();
-            dialog.setTitle("Edit Product");
-            dialog.initModality(Modality.WINDOW_MODAL);
-            dialog.setDialogPane(view);
-
-            // Show the dialog and wait until the user closes it
-            Optional<ButtonType> clickedButton = dialog.showAndWait();
-            if (clickedButton.orElse(ButtonType.CANCEL) == ButtonType.APPLY) {
-                expirationList.add(controller.getProduct());
-            }
-        } catch (NoSuchElementException e) {
-            //TODO IMPLEMENT showNoProductSelectedAlert();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
     }
 
     @FXML
