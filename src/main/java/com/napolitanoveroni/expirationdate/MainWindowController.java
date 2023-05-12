@@ -44,14 +44,15 @@ public class MainWindowController {
         expirationList = getBoughtProductData();
         expirationListTableView.setItems(expirationList);
         editableCols();
-//        expirationListTableView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> onExpirationListItemSelected(newValue));
+
+//        expirationList.addListener(); TODO add listener to expirationList
     }
 
     ObservableList<BoughtProduct> getBoughtProductData() {
         ObservableList<BoughtProduct> boughtProducts = FXCollections.observableArrayList();
         // test product
         boughtProducts.add(new BoughtProduct("alimentari colazione", "latte", LocalDate.now(), 1, 2, 1,
-                LocalDate.now()));
+                LocalDate.now()));  // only for test purpose, TODO database connection
         return boughtProducts;
     }
 
@@ -59,18 +60,12 @@ public class MainWindowController {
         expirationListProductColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         expirationListProductColumn.setOnEditCommit(e->e.getTableView().getItems().get(e.getTablePosition().getRow()).setProductName(e.getNewValue()));
 
-        //expirationListExpirationDateColumn.setCellFactory(ComboBoxTableCell.forTableColumn()); //TODO fix Date Picker
-        //expirationListExpirationDateColumn.setOnEditCommit(e->e.getTableView().getItems().get(e.getTablePosition()
-        // .getRow()).setExpirationDate(e.getNewValue()));
-
-        /* Allow for the values in each cell to be changeable */
-//        expirationListTableView.setEditable(true);
         expirationListProductColumn.setEditable(true);
     }
 
     @FXML
     void onCalendarExpirationListButtonClicked(ActionEvent event) {
-
+        // TODO calendar integration
     }
 
     void showNoProductSelectedAlert() {
@@ -145,7 +140,7 @@ public class MainWindowController {
 
     @FXML
     void onRecipesExpirationListButtonClicked(ActionEvent event) {
-
+        // TODO database connection with recipes
     }
 
 }
