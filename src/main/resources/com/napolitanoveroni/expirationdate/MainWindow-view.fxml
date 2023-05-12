@@ -87,6 +87,9 @@
                      </content>
                   </ScrollPane>
                </center>
+               <bottom>
+                  <Button mnemonicParsing="false" onAction="#onClearButtonClicked" text="Clear" BorderPane.alignment="CENTER" />
+               </bottom>
             </BorderPane>
          </items>
       </SplitPane>

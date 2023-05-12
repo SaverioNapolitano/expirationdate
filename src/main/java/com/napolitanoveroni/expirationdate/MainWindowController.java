@@ -7,6 +7,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
@@ -17,6 +18,7 @@ import javafx.stage.Modality;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.ListIterator;
 import java.util.NoSuchElementException;
 
 public class MainWindowController {
@@ -179,8 +181,24 @@ public class MainWindowController {
             int index = shoppingListVBox.getChildren().indexOf(checkBox.getParent());
             if(!checkBox.isSelected() && !checkBox.isIndeterminate()){
                 shoppingListVBox.getChildren().get(index).toBack();
-            } else {
+            }
+            if(checkBox.isSelected() && !checkBox.isIndeterminate()){
                 shoppingListVBox.getChildren().get(index).toFront();
+            }
+        }
+    }
+
+    @FXML
+    void onClearButtonClicked(ActionEvent ignoredEvent) {
+        ObservableList<Node> children = shoppingListVBox.getChildren();
+        for(ListIterator<Node> nodeListIterator = children.listIterator(); nodeListIterator.hasNext();){
+            Node child = nodeListIterator.next();
+            if(child instanceof GridPane gridPane){
+                if(gridPane.getChildren().get(0) instanceof CheckBox checkBox){
+                    if(checkBox.isSelected() && !checkBox.isIndeterminate()){
+                        nodeListIterator.remove();
+                    }
+                }
             }
         }
     }
