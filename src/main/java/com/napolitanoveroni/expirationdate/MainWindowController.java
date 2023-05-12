@@ -103,9 +103,9 @@ public class MainWindowController {
     }
 
     @FXML
-    void onExpirationListItemSelected(BoughtProduct boughtProduct) {
+    void onEditExpirationDateColumn(TableColumn.CellEditEvent<BoughtProduct, LocalDate> event) {
         int selectedIndex = selectedIndex();
-        BoughtProduct edited = actionOnProduct(expirationListTableView.getItems().get(selectedIndex));
+        BoughtProduct edited = actionOnProduct(event.getRowValue());
 
         expirationListTableView.getItems().set(selectedIndex, edited);
     }
