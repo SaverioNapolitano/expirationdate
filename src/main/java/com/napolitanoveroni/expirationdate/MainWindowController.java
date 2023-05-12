@@ -177,7 +177,11 @@ public class MainWindowController {
     void onCheckBoxChecked(ActionEvent event) {
         if(event.getSource() instanceof CheckBox checkBox){
             int index = shoppingListVBox.getChildren().indexOf(checkBox.getParent());
-            shoppingListVBox.getChildren().get(index).toFront(); //TODO handle uncheck (it has to go above)
+            if(!checkBox.isSelected() && !checkBox.isIndeterminate()){
+                shoppingListVBox.getChildren().get(index).toBack();
+            } else {
+                shoppingListVBox.getChildren().get(index).toFront();
+            }
         }
     }
 }
