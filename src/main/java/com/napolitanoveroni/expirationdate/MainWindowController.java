@@ -125,7 +125,7 @@ public class MainWindowController {
             dialog.setDialogPane(view);
 
             // Show the dialog and wait until the user closes it
-            dialog.showAndWait();
+            dialog.showAndWait();       // TODO add cancel button Check
             return controller.getProduct();
         } catch (NoSuchElementException e) {
             showNoProductSelectedAlert();
@@ -148,7 +148,7 @@ public class MainWindowController {
     }
 
     @FXML
-    void onEnterShoppingTextField(ActionEvent event) {
+    void onEnterShoppingTextField(ActionEvent event) {  // TODO the new item is placed before the checked items
         CheckBox newCheckBox = new CheckBox();
         newCheckBox.setOnAction(this::onCheckBoxChecked);
         TextField newTextField = new TextField();
