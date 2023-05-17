@@ -159,6 +159,8 @@ public class MainWindowController {
         Product edited = actionOnProduct(event.getRowValue());
 
         expirationListTableView.getItems().set(selectedIndex, edited);
+
+
     }
 
     public Product actionOnProduct(Product initialValue) {
