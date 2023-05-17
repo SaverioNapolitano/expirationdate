@@ -157,26 +157,36 @@ public class MainWindowController {
     void onEditExpirationDateColumn(TableColumn.CellEditEvent<Product, LocalDate> event) {
         int selectedIndex = selectedIndex();
         Product oldProduct = event.getRowValue();
-        Product newProduct = actionOnProduct(event.getRowValue());
+        Product editedProduct = actionOnProduct(event.getRowValue());
         try{
-            EditDBProductAllField(oldProduct, newProduct);
-            expirationListTableView.getItems().set(selectedIndex, newProduct);
+            EditDBProductAllField(oldProduct, editedProduct);
+            expirationListTableView.getItems().set(selectedIndex, editedProduct);
         } catch (SQLIntegrityConstraintViolationException e){
-            int newQuantity = newProduct.getQuantity() + oldProduct.getQuantity();
+
             try{
-                EditDBProductQuantity(oldProduct, newQuantity);
+                expirationList.stream().filter(
+                        product -> product.getProductName().equals(editedProduct.getProductName()) && product.getExpirationDate().equals(editedProduct.getExpirationDate())
+                ).forEach(product -> {
+                    int newQuantity = product.getQuantity() + editedProduct.getQuantity();
+                    try {
+                        editDBProductQuantity(product, newQuantity);
+                        product.setQuantity(newQuantity);
+                    } catch (SQLException ex) {
+                        new Alert(Alert.AlertType.ERROR, "Database Error while editing item").showAndWait();
+                    }
+                });
+
+                removeDBProduct(oldProduct);
+                expirationListTableView.getItems().remove(selectedIndex);
             } catch (SQLException exception){
                 new Alert(Alert.AlertType.ERROR, "Database Error while editing item").showAndWait();
             }
-
         } catch (SQLException e){
             new Alert(Alert.AlertType.ERROR, "Database Error while editing item").showAndWait();
         }
-
-
     }
 
-    void EditDBProductQuantity(Product oldProduct, int newQuantity) throws SQLException{
+    void editDBProductQuantity(Product product, int newQuantity) throws SQLException{
         try (
                 Connection connection = dataSource.getConnection();
                 PreparedStatement updateProduct = connection.prepareStatement("UPDATE products SET " +
@@ -185,8 +195,8 @@ public class MainWindowController {
                         " AND " +
                         "expirationDate=?")) {
             updateProduct.setInt(1, newQuantity);
-            updateProduct.setString(2, oldProduct.getProductName());
-            updateProduct.setDate(3, Date.valueOf(oldProduct.getExpirationDate()));
+            updateProduct.setString(2, product.getProductName());
+            updateProduct.setDate(3, Date.valueOf(product.getExpirationDate()));
             updateProduct.executeUpdate();
         }
     }
@@ -216,7 +226,7 @@ public class MainWindowController {
             DialogPane view = loader.load();
             BoughtProductController controller = loader.getController();
 
-            controller.setProduct(initialValue);
+            controller.setProduct(new Product(initialValue));
 
             // Create the dialog
             Dialog<ButtonType> dialog = new Dialog<>();
