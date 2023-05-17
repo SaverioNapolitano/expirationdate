@@ -23,22 +23,17 @@ import java.util.NoSuchElementException;
 
 public class MainWindowController {
 
-    @FXML
-    private TableColumn<BoughtProduct, LocalDate> expirationListExpirationDateColumn;
+    @FXML private TableColumn<BoughtProduct, LocalDate> expirationListExpirationDateColumn;
 
-    @FXML
-    private TableColumn<BoughtProduct, String> expirationListProductColumn;
+    @FXML private TableColumn<BoughtProduct, String> expirationListProductColumn;
 
-    @FXML
-    private TableView<BoughtProduct> expirationListTableView;
+    @FXML private TableView<BoughtProduct> expirationListTableView;
 
-    @FXML
-    private GridPane shoppingListGridPane;
+    @FXML private GridPane shoppingListGridPane;
 
     ObservableList<BoughtProduct> expirationList;
 
-    @FXML
-    private VBox shoppingListVBox;
+    @FXML private VBox shoppingListVBox;
 
     @FXML
     public void initialize() {
