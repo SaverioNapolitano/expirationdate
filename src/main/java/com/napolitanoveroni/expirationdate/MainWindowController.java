@@ -1,5 +1,7 @@
 package com.napolitanoveroni.expirationdate;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -17,41 +19,89 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 
 import java.io.IOException;
+import java.sql.*;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
 
 public class MainWindowController {
 
-    @FXML private TableColumn<BoughtProduct, LocalDate> expirationListExpirationDateColumn;
 
-    @FXML private TableColumn<BoughtProduct, String> expirationListProductColumn;
 
-    @FXML private TableView<BoughtProduct> expirationListTableView;
+    @FXML private TableColumn<Product, LocalDate> expirationListExpirationDateColumn;
+
+    @FXML private TableColumn<Product, String> expirationListProductColumn;
+
+    @FXML private TableView<Product> expirationListTableView;
 
     @FXML private GridPane shoppingListGridPane;
 
-    ObservableList<BoughtProduct> expirationList;
+    ObservableList<Product> expirationList;
 
     @FXML private VBox shoppingListVBox;
+
+
+    private HikariDataSource dataSource;
 
     @FXML
     public void initialize() {
         expirationListProductColumn.setCellValueFactory(new PropertyValueFactory<>("productName"));
         expirationListExpirationDateColumn.setCellValueFactory(new PropertyValueFactory<>("expirationDate"));
-        expirationList = getBoughtProductData();
+
+        try {
+            dbConnection();
+            expirationList = getBoughtProductData();
+        } catch (SQLException e) {
+            expirationList = FXCollections.observableArrayList();
+            new Alert(Alert.AlertType.ERROR, "Database Error: while loading data").showAndWait();
+        }
+
         expirationListTableView.setItems(expirationList);
         editableCols();
 
         //        expirationList.addListener(); TODO add listener to expirationList
+
+
     }
 
-    ObservableList<BoughtProduct> getBoughtProductData() {
-        ObservableList<BoughtProduct> boughtProducts = FXCollections.observableArrayList();
+    private void dbConnection() {
+        HikariConfig config = new HikariConfig();
+        config.setDriverClassName(UtilsDB.JDBC_Driver);
+        config.setJdbcUrl(UtilsDB.JDBC_URL);
+        config.setLeakDetectionThreshold(2000);
+        dataSource = new HikariDataSource(config);
+    }
+
+    ObservableList<Product> getBoughtProductData() throws SQLException {
+        ObservableList<Product> products = FXCollections.observableArrayList();
         // test product
-        boughtProducts.add(new BoughtProduct("latte", LocalDate.now(), "alimentari colazione", 1, 2));  // only for test
+        // boughtProducts.add(new BoughtProduct("latte", LocalDate.now(), "alimentari colazione", 1, 2));  // only for
+
         // purpose, TODO database connection
-        return boughtProducts;
+        try (
+                Connection connection = dataSource.getConnection();
+                PreparedStatement getProducts = connection.prepareStatement("SELECT * FROM products");
+                ResultSet rs = getProducts.executeQuery()
+        ) {
+            while (rs.next()) {
+                products.add(new Product(
+                        rs.getString("productName"),
+                        convertSQLDateToLocalDate(rs.getDate("expirationDate")),
+                        rs.getString("categoryName"),
+                        rs.getInt("quantity"),
+                        rs.getDouble("price")
+                ));
+            }
+        }
+
+
+        return products;
+    }
+
+    public static LocalDate convertSQLDateToLocalDate(Date SQLDate) {
+        java.util.Date date = new java.util.Date(SQLDate.getTime());
+        return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
     }
 
     private void editableCols() {
@@ -78,7 +128,13 @@ public class MainWindowController {
     void onDeleteExpirationListButtonClicked(ActionEvent ignoredEvent) {
         try {
             int selectedIndex = selectedIndex();
+            Product removeProduct = expirationListTableView.getItems().get(selectedIndex);
+
+            removeDBProduct(removeProduct);
+
             expirationListTableView.getItems().remove(selectedIndex);
+        } catch (SQLException e) {
+            new Alert(Alert.AlertType.ERROR, "Database Error while removing item").showAndWait();
         } catch (NoSuchElementException e) {
             showNoProductSelectedAlert();
         }
@@ -98,14 +154,14 @@ public class MainWindowController {
     }
 
     @FXML
-    void onEditExpirationDateColumn(TableColumn.CellEditEvent<BoughtProduct, LocalDate> event) {
+    void onEditExpirationDateColumn(TableColumn.CellEditEvent<Product, LocalDate> event) {
         int selectedIndex = selectedIndex();
-        BoughtProduct edited = actionOnProduct(event.getRowValue());
+        Product edited = actionOnProduct(event.getRowValue());
 
         expirationListTableView.getItems().set(selectedIndex, edited);
     }
 
-    public BoughtProduct actionOnProduct(BoughtProduct initialValue) {
+    public Product actionOnProduct(Product initialValue) {
         try {
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(getClass().getResource("EditBoughtProduct.fxml"));
@@ -134,8 +190,29 @@ public class MainWindowController {
 
     @FXML
     void onNewExpirationListButtonClicked(ActionEvent ignoredEvent) {
-        BoughtProduct edited = actionOnProduct(new BoughtProduct());
-        expirationList.add(edited);
+        try {
+            Product edited = actionOnProduct(new Product());
+            insertDBProduct(edited);
+            expirationList.add(edited);
+        } catch (SQLException e) {
+            new Alert(Alert.AlertType.ERROR, "Database Error: while adding item").showAndWait();
+        }
+    }
+
+    void insertDBProduct(Product product) throws SQLException {
+        try (
+            Connection connection = dataSource.getConnection();
+            PreparedStatement insertProduct =
+                    connection.prepareStatement("INSERT INTO products (productName, " + "expirationDate, " +
+                            "categoryName, " + "quantity, price) VALUES (?, ?, ?, ?, ?)")
+        ) {
+            insertProduct.setString(1, product.getProductName());
+            insertProduct.setDate(2, Date.valueOf(product.getExpirationDate()));
+            insertProduct.setString(3, product.getCategoryName());
+            insertProduct.setInt(4, product.getQuantity());
+            insertProduct.setDouble(5, product.getPrice());
+            insertProduct.executeUpdate();
+        }
     }
 
     @FXML
@@ -176,6 +253,18 @@ public class MainWindowController {
         }
     }
 
+    void removeDBProduct(Product product) throws SQLException {
+        try (
+            Connection connection = dataSource.getConnection();
+            PreparedStatement deleteProduct = connection.prepareStatement("DELETE FROM products WHERE productName=? " +
+                    "AND expirationDate=?")
+        ) {
+            deleteProduct.setString(1, product.getProductName());
+            deleteProduct.setDate(2, Date.valueOf(product.getExpirationDate()));
+            deleteProduct.executeUpdate();
+        }
+    }
+
     @FXML
     void onCheckBoxChecked(ActionEvent event) {
         if (event.getSource() instanceof CheckBox checkBox) {
@@ -195,8 +284,13 @@ public class MainWindowController {
                     }
                 }
 
-                BoughtProduct edited = actionOnProduct(new BoughtProduct(productName));
-                expirationList.add(edited);
+                try {
+                    Product edited = actionOnProduct(new Product(productName));
+                    insertDBProduct(edited);
+                    expirationList.add(edited);
+                } catch (SQLException e) {
+                    new Alert(Alert.AlertType.ERROR, "Database Error: while adding item").showAndWait();
+                }
             }
         }
     }

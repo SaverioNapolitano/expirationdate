@@ -21,7 +21,7 @@ public class BoughtProductController {
     @FXML
     private TextField quantityTextField;
 
-    BoughtProduct product;
+    Product product;
 
     @FXML
     public void initialize() {
@@ -42,12 +42,12 @@ public class BoughtProductController {
         expirationDatePicker.valueProperty().set(product.getExpirationDate());
     }
 
-    public void setProduct(BoughtProduct product) {
+    public void setProduct(Product product) {
         this.product = product;
         update();
     }
 
-    public BoughtProduct getProduct() {
+    public Product getProduct() {
         return product;
     }
 }

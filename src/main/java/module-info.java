@@ -3,6 +3,8 @@ module com.napolitanoveroni.expirationdate {
     requires javafx.fxml;
 
     requires org.controlsfx.controls;
+    requires com.zaxxer.hikari;
+    requires java.sql;
 
     opens com.napolitanoveroni.expirationdate to javafx.fxml;
     exports com.napolitanoveroni.expirationdate;

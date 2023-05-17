@@ -2,7 +2,7 @@ package com.napolitanoveroni.expirationdate;
 
 import java.time.LocalDate;
 
-public class BoughtProduct {
+public class Product {
     String productName;
     LocalDate expirationDate;
     String categoryName;
@@ -25,7 +25,7 @@ public class BoughtProduct {
         this.categoryName = categoryName;
     }
 
-    public BoughtProduct() {
+    public Product() {
         setProductName("");
         setExpirationDate(LocalDate.now());
         setCategoryName("");
@@ -57,7 +57,7 @@ public class BoughtProduct {
         this.expirationDate = expirationDate;
     }
 
-    public BoughtProduct(String productName, LocalDate expirationDate, String categoryName, int quantity, double price) {
+    public Product(String productName, LocalDate expirationDate, String categoryName, int quantity, double price) {
         setProductName(productName);
         setExpirationDate(expirationDate);
         setCategoryName(categoryName);
@@ -65,7 +65,7 @@ public class BoughtProduct {
         setPrice(price);
     }
 
-    public BoughtProduct(String productName) {
+    public Product(String productName) {
         setProductName(productName);
         setExpirationDate(LocalDate.now());
         setCategoryName("");
@@ -73,7 +73,7 @@ public class BoughtProduct {
         setPrice(0);
     }
 
-    public BoughtProduct(BoughtProduct other) {
+    public Product(Product other) {
         setProductName(other.getProductName());
         setExpirationDate(other.getExpirationDate());
         setCategoryName(other.getCategoryName());
