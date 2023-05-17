@@ -156,13 +156,40 @@ public class MainWindowController {
     @FXML
     void onEditExpirationDateColumn(TableColumn.CellEditEvent<Product, LocalDate> event) {
         int selectedIndex = selectedIndex();
-        Product edited = actionOnProduct(event.getRowValue());
+        Product oldProduct = event.getRowValue();
+        Product newProduct = actionOnProduct(event.getRowValue());
+        try{
+            EditDBProductAllField(oldProduct, newProduct);
+            expirationListTableView.getItems().set(selectedIndex, newProduct);
+        } catch (SQLIntegrityConstraintViolationException e){
+            int newQuantity = newProduct.getQuantity() + oldProduct.getQuantity();
+            try{
+                EditDBProductQuantity(oldProduct, newQuantity);
+            } catch (SQLException exception){
+                new Alert(Alert.AlertType.ERROR, "Database Error while editing item").showAndWait();
+            }
 
-        expirationListTableView.getItems().set(selectedIndex, edited);
+        } catch (SQLException e){
+            new Alert(Alert.AlertType.ERROR, "Database Error while editing item").showAndWait();
+        }
 
 
     }
 
+    void EditDBProductQuantity(Product oldProduct, int newQuantity) throws SQLException{
+        try (
+                Connection connection = dataSource.getConnection();
+                PreparedStatement updateProduct = connection.prepareStatement("UPDATE products SET " +
+                        "quantity=?" +
+                        " WHERE productName=?" +
+                        " AND " +
+                        "expirationDate=?")) {
+            updateProduct.setInt(1, newQuantity);
+            updateProduct.setString(2, oldProduct.getProductName());
+            updateProduct.setDate(3, Date.valueOf(oldProduct.getExpirationDate()));
+            updateProduct.executeUpdate();
+        }
+    }
     void EditDBProductAllField(Product oldProduct, Product newProduct) throws SQLException {
         try (
             Connection connection = dataSource.getConnection();
@@ -172,9 +199,13 @@ public class MainWindowController {
                          " AND " +
                          "expirationDate=?")) {
             updateProduct.setString(1, newProduct.getProductName());
-            updateProduct.setString(2, newProduct.getRowValue().getUUID().toString());
+            updateProduct.setDate(2, Date.valueOf(newProduct.getExpirationDate()));
+            updateProduct.setString(3, newProduct.getCategoryName());
+            updateProduct.setInt(4, newProduct.getQuantity());
+            updateProduct.setDouble(5, newProduct.getPrice());
+            updateProduct.setString(6, oldProduct.getProductName());
+            updateProduct.setDate(7, Date.valueOf(newProduct.getExpirationDate()));
             updateProduct.executeUpdate();
-            e.getRowValue().setCategory(e.getNewValue());
         }
     }
 
