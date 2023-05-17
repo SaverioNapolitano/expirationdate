@@ -163,6 +163,21 @@ public class MainWindowController {
 
     }
 
+    void EditDBProductAllField(Product oldProduct, Product newProduct) throws SQLException {
+        try (
+            Connection connection = dataSource.getConnection();
+            PreparedStatement updateProduct = connection.prepareStatement("UPDATE products SET productName=?, expirationDate=?, " +
+                         "categoryName=?, quantity=?, price=?" +
+                         " WHERE productName=?" +
+                         " AND " +
+                         "expirationDate=?")) {
+            updateProduct.setString(1, newProduct.getProductName());
+            updateProduct.setString(2, newProduct.getRowValue().getUUID().toString());
+            updateProduct.executeUpdate();
+            e.getRowValue().setCategory(e.getNewValue());
+        }
+    }
+
     public Product actionOnProduct(Product initialValue) {
         try {
             FXMLLoader loader = new FXMLLoader();
