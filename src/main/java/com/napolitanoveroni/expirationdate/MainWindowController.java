@@ -189,7 +189,18 @@ public class MainWindowController {
             }
             if (checkBox.isSelected() && !checkBox.isIndeterminate()) { //checked
                 shoppingListVBox.getChildren().get(index).toFront();
-                onNewExpirationListButtonClicked(event);
+                index = shoppingListVBox.getChildren().size() - 1;
+
+                String productName = "";
+
+                if (shoppingListVBox.getChildren().get(index) instanceof GridPane indexthGridPane) {
+                    if (indexthGridPane.getChildren().get(1) instanceof TextField textField) {
+                        productName = textField.getText();
+                    }
+                }
+
+                BoughtProduct edited = actionOnProduct(new BoughtProduct(productName));
+                expirationList.add(edited);
             }
         }
     }

@@ -45,6 +45,13 @@ public class BoughtProduct extends Product {
         setExpirationDate(expirationDate);
     }
 
+    public BoughtProduct(String productName) {
+        super("", productName, LocalDate.now(), 0);
+        setPrice(0);
+        setQuantity(1);
+        setExpirationDate(LocalDate.now());
+    }
+
     public BoughtProduct(BoughtProduct other) {
         super(other.getCategoryName(), other.getProductName(), other.getEstimatedExpirationDate(), other.getEstimatedPrice());
         setPrice(other.getPrice());
