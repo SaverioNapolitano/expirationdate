@@ -2,16 +2,35 @@ package com.napolitanoveroni.expirationdate;
 
 import java.time.LocalDate;
 
-public class BoughtProduct extends Product {
-    double price;
-    int quantity;
+public class BoughtProduct {
+    String productName;
     LocalDate expirationDate;
+    String categoryName;
+    int quantity;
+    double price;
+
+    public String getProductName() {
+        return productName;
+    }
+
+    public void setProductName(String productName) {
+        this.productName = productName;
+    }
+
+    public String getCategoryName() {
+        return categoryName;
+    }
+
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
+    }
 
     public BoughtProduct() {
-        super("", "", LocalDate.now(), 0);
-        price = 0;
-        quantity = 1;
-        expirationDate = LocalDate.now();
+        setProductName("");
+        setExpirationDate(LocalDate.now());
+        setCategoryName("");
+        setQuantity(1);
+        setPrice(0);
     }
 
     public double getPrice() {
@@ -38,24 +57,27 @@ public class BoughtProduct extends Product {
         this.expirationDate = expirationDate;
     }
 
-    public BoughtProduct(String categoryName, String productName, LocalDate estimatedExpirationDate, double estimatedPrice, double price, int quantity, LocalDate expirationDate) {
-        super(categoryName, productName, estimatedExpirationDate, estimatedPrice);
-        setPrice(price);
-        setQuantity(quantity);
+    public BoughtProduct(String productName, LocalDate expirationDate, String categoryName, int quantity, double price) {
+        setProductName(productName);
         setExpirationDate(expirationDate);
+        setCategoryName(categoryName);
+        setQuantity(quantity);
+        setPrice(price);
     }
 
     public BoughtProduct(String productName) {
-        super("", productName, LocalDate.now(), 0);
-        setPrice(0);
-        setQuantity(1);
+        setProductName(productName);
         setExpirationDate(LocalDate.now());
+        setCategoryName("");
+        setQuantity(1);
+        setPrice(0);
     }
 
     public BoughtProduct(BoughtProduct other) {
-        super(other.getCategoryName(), other.getProductName(), other.getEstimatedExpirationDate(), other.getEstimatedPrice());
-        setPrice(other.getPrice());
-        setQuantity(other.getQuantity());
+        setProductName(other.getProductName());
         setExpirationDate(other.getExpirationDate());
+        setCategoryName(other.getCategoryName());
+        setQuantity(other.getQuantity());
+        setPrice(other.getPrice());
     }
 }

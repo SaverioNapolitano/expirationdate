@@ -54,7 +54,8 @@ public class MainWindowController {
     ObservableList<BoughtProduct> getBoughtProductData() {
         ObservableList<BoughtProduct> boughtProducts = FXCollections.observableArrayList();
         // test product
-        boughtProducts.add(new BoughtProduct("alimentari colazione", "latte", LocalDate.now(), 1, 2, 1, LocalDate.now()));  // only for test purpose, TODO database connection
+        boughtProducts.add(new BoughtProduct("latte", LocalDate.now(), "alimentari colazione", 1, 2));  // only for test
+        // purpose, TODO database connection
         return boughtProducts;
     }
 

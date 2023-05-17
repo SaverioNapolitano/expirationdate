@@ -28,9 +28,9 @@ public class BoughtProductController {
         nameTextField.textProperty().addListener((observable, oldValue, newValue) -> product.setProductName(newValue));
         categoryTextField.textProperty().addListener((observable, oldValue, newValue) -> product.setCategoryName(newValue));
         priceTextField.textProperty().addListener((observable, oldValue, newValue) -> product.setPrice(Double.parseDouble(newValue)));
-        // TODO check parse errors
+        // TODO check parse errors (WARNING, ignore when the text field is empty)
         quantityTextField.textProperty().addListener((observable, oldValue, newValue) -> product.setQuantity(Integer.parseInt(newValue)));
-        // TODO check parse errors
+        // TODO check parse errors (WARNING, ignore when the text field is empty)
         expirationDatePicker.valueProperty().addListener((observable, oldValue, newValue) -> product.setExpirationDate(newValue));
     }
 
