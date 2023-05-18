@@ -421,5 +421,8 @@ public class MainWindowController {
                 }
             }
         }
+        if (children.isEmpty()) {
+            onEnterShoppingTextField(ignoredEvent);
+        }
     }
 }
