@@ -106,7 +106,35 @@ public class MainWindowController {
 
     private void editableCols() {
         expirationListProductColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-        expirationListProductColumn.setOnEditCommit(e -> e.getTableView().getItems().get(e.getTablePosition().getRow()).setProductName(e.getNewValue()));
+        expirationListProductColumn.setOnEditCommit(e ->
+        {
+            Product oldProduct = e.getTableView().getItems().get(e.getTablePosition().getRow());
+            Product backupOldProduct = new Product(oldProduct);
+            String newName = e.getNewValue();
+
+            try {
+                editDBProductName(oldProduct, newName);
+                oldProduct.setProductName(newName);
+                removeDBProduct(backupOldProduct);
+            } catch (SQLIntegrityConstraintViolationException exception) {
+                expirationList.stream().filter(
+                        product -> product.getProductName().equals(newName) && product.getExpirationDate().equals(oldProduct.getExpirationDate())
+                ).forEach(product -> {
+                    int newQuantity = product.getQuantity() + oldProduct.getQuantity();
+                    try {
+                        editDBProductQuantity(product, newQuantity);
+                        product.setQuantity(newQuantity);
+                        removeDBProduct(backupOldProduct);
+                        expirationListTableView.getItems().remove(expirationListTableView.getSelectionModel().getSelectedIndex());
+                    } catch (SQLException ex) {
+                        new Alert(Alert.AlertType.ERROR, "Database Error while editing item").showAndWait();
+                    }
+                });
+            } catch (SQLException exception){
+                new Alert(Alert.AlertType.ERROR, "Database Error while editing item").showAndWait();
+            }
+
+        });
 
         expirationListProductColumn.setEditable(true);
     }
@@ -182,6 +210,21 @@ public class MainWindowController {
             }
         } catch (SQLException e){
             new Alert(Alert.AlertType.ERROR, "Database Error while editing item").showAndWait();
+        }
+    }
+
+    void editDBProductName(Product product, String newName) throws SQLException{
+        try (
+                Connection connection = dataSource.getConnection();
+                PreparedStatement updateProduct = connection.prepareStatement("UPDATE products SET " +
+                        "productName=?" +
+                        " WHERE productName=?" +
+                        " AND " +
+                        "expirationDate=?")) {
+            updateProduct.setString(1, newName);
+            updateProduct.setString(2, product.getProductName());
+            updateProduct.setDate(3, Date.valueOf(product.getExpirationDate()));
+            updateProduct.executeUpdate();
         }
     }
 
