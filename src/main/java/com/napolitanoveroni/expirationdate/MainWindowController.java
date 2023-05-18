@@ -24,6 +24,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 public class MainWindowController {
 
@@ -75,10 +76,7 @@ public class MainWindowController {
 
     ObservableList<Product> getBoughtProductData() throws SQLException {
         ObservableList<Product> products = FXCollections.observableArrayList();
-        // test product
-        // boughtProducts.add(new BoughtProduct("latte", LocalDate.now(), "alimentari colazione", 1, 2));  // only for
 
-        // purpose, TODO database connection
         try (
                 Connection connection = dataSource.getConnection();
                 PreparedStatement getProducts = connection.prepareStatement("SELECT * FROM products");
@@ -277,8 +275,12 @@ public class MainWindowController {
             dialog.setDialogPane(view);
 
             // Show the dialog and wait until the user closes it
-            dialog.showAndWait();       // TODO add cancel button Check
-            return controller.getProduct();
+            Optional<ButtonType> clickedButton = dialog.showAndWait();
+            if (clickedButton.orElse(ButtonType.CANCEL) == ButtonType.OK) {
+                return controller.getProduct();
+            }
+
+            return initialValue;
         } catch (NoSuchElementException e) {
             showNoProductSelectedAlert();
         } catch (IOException e) {
