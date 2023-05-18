@@ -4,7 +4,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TextField;
 
-public class BoughtProductController {
+public class EditProductController {
 
     @FXML
     private TextField categoryTextField;

@@ -262,9 +262,9 @@ public class MainWindowController {
     public Product actionOnProduct(Product initialValue) {
         try {
             FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(getClass().getResource("EditBoughtProduct.fxml"));
+            loader.setLocation(getClass().getResource("EditProduct-view.fxml"));
             DialogPane view = loader.load();
-            BoughtProductController controller = loader.getController();
+            EditProductController controller = loader.getController();
 
             controller.setProduct(new Product(initialValue));
 
@@ -276,7 +276,7 @@ public class MainWindowController {
 
             // Show the dialog and wait until the user closes it
             Optional<ButtonType> clickedButton = dialog.showAndWait();
-            if (clickedButton.orElse(ButtonType.CANCEL) == ButtonType.OK) {
+            if (clickedButton.orElse(ButtonType.CANCEL) == ButtonType.APPLY) {
                 return controller.getProduct();
             }
 
