@@ -162,20 +162,19 @@ public class MainWindowController {
             EditDBProductAllField(oldProduct, editedProduct);
             expirationListTableView.getItems().set(selectedIndex, editedProduct);
         } catch (SQLIntegrityConstraintViolationException e){
+            expirationList.stream().filter(
+                    product -> product.getProductName().equals(editedProduct.getProductName()) && product.getExpirationDate().equals(editedProduct.getExpirationDate())
+            ).forEach(product -> {
+                int newQuantity = product.getQuantity() + editedProduct.getQuantity();
+                try {
+                    editDBProductQuantity(product, newQuantity);
+                    product.setQuantity(newQuantity);
+                } catch (SQLException ex) {
+                    new Alert(Alert.AlertType.ERROR, "Database Error while editing item").showAndWait();
+                }
+            });
 
             try{
-                expirationList.stream().filter(
-                        product -> product.getProductName().equals(editedProduct.getProductName()) && product.getExpirationDate().equals(editedProduct.getExpirationDate())
-                ).forEach(product -> {
-                    int newQuantity = product.getQuantity() + editedProduct.getQuantity();
-                    try {
-                        editDBProductQuantity(product, newQuantity);
-                        product.setQuantity(newQuantity);
-                    } catch (SQLException ex) {
-                        new Alert(Alert.AlertType.ERROR, "Database Error while editing item").showAndWait();
-                    }
-                });
-
                 removeDBProduct(oldProduct);
                 expirationListTableView.getItems().remove(selectedIndex);
             } catch (SQLException exception){
@@ -185,6 +184,8 @@ public class MainWindowController {
             new Alert(Alert.AlertType.ERROR, "Database Error while editing item").showAndWait();
         }
     }
+
+
 
     void editDBProductQuantity(Product product, int newQuantity) throws SQLException{
         try (
@@ -214,7 +215,7 @@ public class MainWindowController {
             updateProduct.setInt(4, newProduct.getQuantity());
             updateProduct.setDouble(5, newProduct.getPrice());
             updateProduct.setString(6, oldProduct.getProductName());
-            updateProduct.setDate(7, Date.valueOf(newProduct.getExpirationDate()));
+            updateProduct.setDate(7, Date.valueOf(oldProduct.getExpirationDate()));
             updateProduct.executeUpdate();
         }
     }
