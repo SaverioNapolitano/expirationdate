@@ -159,7 +159,7 @@ public class MainWindowController {
         Product oldProduct = event.getRowValue();
         Product editedProduct = actionOnProduct(event.getRowValue());
         try{
-            EditDBProductAllField(oldProduct, editedProduct);
+            editDBProductAllField(oldProduct, editedProduct);
             expirationListTableView.getItems().set(selectedIndex, editedProduct);
         } catch (SQLIntegrityConstraintViolationException e){
             expirationList.stream().filter(
@@ -185,8 +185,6 @@ public class MainWindowController {
         }
     }
 
-
-
     void editDBProductQuantity(Product product, int newQuantity) throws SQLException{
         try (
                 Connection connection = dataSource.getConnection();
@@ -201,7 +199,7 @@ public class MainWindowController {
             updateProduct.executeUpdate();
         }
     }
-    void EditDBProductAllField(Product oldProduct, Product newProduct) throws SQLException {
+    void editDBProductAllField(Product oldProduct, Product newProduct) throws SQLException {
         try (
             Connection connection = dataSource.getConnection();
             PreparedStatement updateProduct = connection.prepareStatement("UPDATE products SET productName=?, expirationDate=?, " +
@@ -249,11 +247,24 @@ public class MainWindowController {
 
     @FXML
     void onNewExpirationListButtonClicked(ActionEvent ignoredEvent) {
+        Product edited = actionOnProduct(new Product());
         try {
-            Product edited = actionOnProduct(new Product());
             insertDBProduct(edited);
             expirationList.add(edited);
-        } catch (SQLException e) {
+        } catch (SQLIntegrityConstraintViolationException e) {
+            expirationList.stream().filter(
+                    product -> product.getProductName().equals(edited.getProductName()) && product.getExpirationDate().equals(edited.getExpirationDate())
+            ).forEach(product -> {
+                int newQuantity = product.getQuantity() + edited.getQuantity();
+                try {
+                    editDBProductQuantity(product, newQuantity);
+                    product.setQuantity(newQuantity);
+                } catch (SQLException ex) {
+                    new Alert(Alert.AlertType.ERROR, "Database Error while editing item").showAndWait();
+                }
+            });
+        }
+        catch (SQLException e) {
             new Alert(Alert.AlertType.ERROR, "Database Error: while adding item").showAndWait();
         }
     }
