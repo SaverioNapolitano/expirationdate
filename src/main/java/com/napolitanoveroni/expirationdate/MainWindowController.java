@@ -17,7 +17,15 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
+import net.fortuna.ical4j.data.CalendarOutputter;
+import net.fortuna.ical4j.model.Calendar;
+import net.fortuna.ical4j.model.PropertyList;
+import net.fortuna.ical4j.model.component.VEvent;
+import net.fortuna.ical4j.model.property.*;
+import net.fortuna.ical4j.validate.ValidationException;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.sql.*;
 import java.time.LocalDate;
@@ -137,9 +145,65 @@ public class MainWindowController {
         expirationListProductColumn.setEditable(true);
     }
 
+    private VEvent oneHourSingleEvent() {
+        //Create a new calendar event that starts on 5th March 2021 at midday Australian Eastern Daylight Savings Time and goes for 1 hour.
+        VEvent vEvent = new VEvent();
+        PropertyList eventProps = new PropertyList(vEvent.getProperties());
+        java.time.ZonedDateTime now = java.time.ZonedDateTime.now();
+
+        //Create a unique ID for the event
+        String uidTimestamp = java.time.format.DateTimeFormatter
+                .ofPattern("uuuuMMdd'T'hhmmssXX")
+                .format(now);
+        //In the real world this could be a number from a generated sequence:
+        String uidSequence = "/" + (int) Math.ceil(Math.random() * 1000);
+        String uidDomain = "@your.domain.com";
+        eventProps.add(new Uid(uidTimestamp + uidSequence + uidDomain));
+
+
+        eventProps.add(new DtStart<>(LocalDate.now()));
+        eventProps.add(new Duration(java.time.Duration.ofHours(1)));
+
+        //Add title and description
+        eventProps.add(new Summary("The title of the event"));
+        eventProps.add(new Description("Some longer description of the event."));
+        return vEvent;
+    }
+
     @FXML
     void onCalendarExpirationListButtonClicked(ActionEvent ignoredEvent) {
         // TODO calendar integration
+        Calendar calendar = new Calendar();
+        calendar.getProperties().add(new ProdId("-//Ben Fortuna//iCal4j 1.0//EN"));
+        //calendar.getProperties().add(CalScale.);
+
+        VEvent event = oneHourSingleEvent();
+
+        calendar.getComponents().add(event);
+
+        String filePath = "mymeeting.ics";
+        FileOutputStream fout = null;
+        try {
+
+            fout = new FileOutputStream(filePath);
+            CalendarOutputter outputter = new CalendarOutputter();
+            outputter.output(calendar, fout);
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (ValidationException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (fout != null) {
+                try {
+                    fout.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     void showNoProductSelectedAlert() {
@@ -335,6 +399,9 @@ public class MainWindowController {
         // TODO database connection with recipes
     }
 
+    /**
+     *
+     */
     @FXML
     void onEnterShoppingTextField(ActionEvent event) {  // TODO the new item is placed before the checked items
         CheckBox newCheckBox = new CheckBox();
@@ -353,6 +420,7 @@ public class MainWindowController {
         newGridPane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         newGridPane.setMinSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
         newGridPane.setPrefSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
+
         shoppingListVBox.getChildren().add(newGridPane);
         newGridPane.addRow(newGridPane.getRowCount(), newCheckBox, newTextField, newButton);
         newTextField.requestFocus(); //TODO resize newGridPane
@@ -427,4 +495,6 @@ public class MainWindowController {
             onEnterShoppingTextField(ignoredEvent);
         }
     }
+
+
 }
