@@ -59,8 +59,6 @@ public class UtilsDB {
     }
 
     static void editDBProductName(Product oldProduct, String newName, MainWindowController main) throws SQLException{
-        // TODO move this function to UtilsDB.java
-        // TODO add resolution of SQLIntegrityConstraintViolationException
 
         try (
                 Connection connection = dataSource.getConnection();
@@ -78,8 +76,6 @@ public class UtilsDB {
     }
 
     static void editDBProductAllField(Product oldProduct, Product newProduct, MainWindowController main) throws SQLException {
-        // TODO move this function to UtilsDB.java
-        // TODO add resolution of SQLIntegrityConstraintViolationException
         try (
                 Connection connection = dataSource.getConnection();
                 PreparedStatement updateProduct = connection.prepareStatement("UPDATE products SET productName=?, expirationDate=?, " +
@@ -101,7 +97,6 @@ public class UtilsDB {
     }
 
     static void editDBProductQuantity(Product product, int newQuantity) throws SQLException{
-        // TODO move this to UtilsDB.java
         try (
                 Connection connection = dataSource.getConnection();
                 PreparedStatement updateProduct = connection.prepareStatement("UPDATE products SET " +

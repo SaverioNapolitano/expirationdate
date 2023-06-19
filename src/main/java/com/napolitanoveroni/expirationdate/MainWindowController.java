@@ -60,10 +60,6 @@ public class MainWindowController {
         editableCols();
 
         sortTableView(expirationListTableView);
-
-        //        expirationList.addListener(); TODO add listener to expirationList
-
-
     }
 
     private void editableCols() {
