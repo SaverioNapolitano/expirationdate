@@ -40,8 +40,7 @@ public class MainWindowController {
 
     @FXML private VBox shoppingListVBox;
 
-
-
+    private boolean cancelEditProduct = false;
 
     @FXML
     public void initialize() {
@@ -140,11 +139,14 @@ public class MainWindowController {
         int selectedIndex = selectedIndex();
         Product oldProduct = event.getRowValue();
         Product editedProduct = actionOnProduct(oldProduct);
-        try {
-            editDBProductAllField(oldProduct, editedProduct, this);
-            expirationListTableView.getItems().set(selectedIndex, editedProduct);
-        } catch (SQLException e){
-            UtilsDB.onSQLException(onSQLExceptionMessage);
+
+        if (!editedProduct.getProductName().equals("")) {
+            try {
+                editDBProductAllField(oldProduct, editedProduct, this);
+                expirationListTableView.getItems().set(selectedIndex, editedProduct);
+            } catch (SQLException e) {
+                UtilsDB.onSQLException(onSQLExceptionMessage);
+            }
         }
 
         sortTableView(expirationListTableView);
@@ -190,6 +192,8 @@ public class MainWindowController {
                 return controller.getProduct();
             }
 
+            cancelEditProduct = true;
+
             return initialValue;
         } catch (NoSuchElementException e) {
             showNoProductSelectedAlert();
@@ -203,24 +207,23 @@ public class MainWindowController {
     @FXML
     void onNewExpirationListButtonClicked(ActionEvent ignoredEvent) {
         Product edited = actionOnProduct(new Product());
-        try {
-            insertDBProduct(edited);
-            expirationList.add(edited);
-        } catch (SQLIntegrityConstraintViolationException e) {
-            expirationList.stream().filter(
-                    product -> product.getProductName().equals(edited.getProductName()) && product.getExpirationDate().equals(edited.getExpirationDate())
-            ).forEach(product -> {
-                int newQuantity = product.getQuantity() + edited.getQuantity();
-                try {
-                    editDBProductQuantity(product, newQuantity);
-                    product.setQuantity(newQuantity);
-                } catch (SQLException ex) {
-                    new Alert(Alert.AlertType.ERROR, "Database Error while editing item").showAndWait();
-                }
-            });
-        }
-        catch (SQLException e) {
-            new Alert(Alert.AlertType.ERROR, "Database Error: while adding item").showAndWait();
+        if (!edited.getProductName().equals("")) {
+            try {
+                insertDBProduct(edited);
+                expirationList.add(edited);
+            } catch (SQLIntegrityConstraintViolationException e) {
+                expirationList.stream().filter(product -> product.getProductName().equals(edited.getProductName()) && product.getExpirationDate().equals(edited.getExpirationDate())).forEach(product -> {
+                    int newQuantity = product.getQuantity() + edited.getQuantity();
+                    try {
+                        editDBProductQuantity(product, newQuantity);
+                        product.setQuantity(newQuantity);
+                    } catch (SQLException ex) {
+                        new Alert(Alert.AlertType.ERROR, "Database Error while editing item").showAndWait();
+                    }
+                });
+            } catch (SQLException e) {
+                new Alert(Alert.AlertType.ERROR, "Database Error: while adding item").showAndWait();
+            }
         }
 
         sortTableView(expirationListTableView);
@@ -285,8 +288,14 @@ public class MainWindowController {
 
                 try {
                     Product edited = actionOnProduct(new Product(productName));
-                    insertDBProduct(edited);
-                    expirationList.add(edited);
+                    if (!cancelEditProduct && !edited.getProductName().equals("")) {
+                        insertDBProduct(edited);
+                        expirationList.add(edited);
+                    } else {
+                        checkBox.setSelected(false);
+                        cancelEditProduct = false;
+                    }
+
                 } catch (SQLException e) {
                     new Alert(Alert.AlertType.ERROR, "Database Error: while adding item").showAndWait();
                 }
