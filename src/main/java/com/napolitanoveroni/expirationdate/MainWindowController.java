@@ -68,8 +68,8 @@ public class MainWindowController {
 
     private void dbConnection() throws SQLException {
         HikariConfig config = new HikariConfig();
-        config.setDriverClassName(UtilsDB.JDBC_Driver);
-        config.setJdbcUrl(UtilsDB.JDBC_URL);
+        config.setDriverClassName(PersonalConfigDB.JDBC_Driver);
+        config.setJdbcUrl(PersonalConfigDB.JDBC_URL);
         config.setLeakDetectionThreshold(2000);
         dataSource = new HikariDataSource(config);
     }

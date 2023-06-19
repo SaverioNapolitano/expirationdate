@@ -40,4 +40,6 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
 /mymeeting.ics
+/src/main/java/com/napolitanoveroni/expirationdate/PersonalConfigDB.java
