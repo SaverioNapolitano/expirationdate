@@ -161,21 +161,6 @@ public class MainWindowController {
         try {
             editDBProductName(oldProduct, newName);
             oldProduct.setProductName(newName);
-        } catch (SQLIntegrityConstraintViolationException exception) {
-            // In this case we renamed a product to an already existing item with the same expiration date
-            expirationList.stream().filter(
-                    product -> product.getProductName().equals(newName) && product.getExpirationDate().equals(oldProduct.getExpirationDate())
-            ).forEach(product -> {
-                int newQuantity = product.getQuantity() + oldProduct.getQuantity();
-                try {
-                    editDBProductQuantity(product, newQuantity);
-                    product.setQuantity(newQuantity);
-                    removeDBProduct(oldProduct);
-                    expirationListTableView.getItems().remove(expirationListTableView.getSelectionModel().getSelectedIndex());
-                } catch (SQLException ex) {
-                    UtilsDB.onSQLException(onSQLExceptionMessage);
-                }
-            });
         } catch (SQLException exception){
             UtilsDB.onSQLException(onSQLExceptionMessage);
         }
@@ -190,39 +175,48 @@ public class MainWindowController {
         try {
             editDBProductAllField(oldProduct, editedProduct);
             expirationListTableView.getItems().set(selectedIndex, editedProduct);
-        } catch (SQLIntegrityConstraintViolationException e){
-            expirationList.stream().filter(
-                    product -> product.getProductName().equals(editedProduct.getProductName()) && product.getExpirationDate().equals(editedProduct.getExpirationDate())
-            ).forEach(product -> {
-                int newQuantity = product.getQuantity() + oldProduct.getQuantity();
-                try {
-                    editDBProductQuantity(product, newQuantity);
-                    product.setQuantity(newQuantity);
-                    removeDBProduct(oldProduct);
-                    expirationListTableView.getItems().remove(expirationListTableView.getSelectionModel().getSelectedIndex());
-                } catch (SQLException ex) {
-                    UtilsDB.onSQLException(onSQLExceptionMessage);
-                }
-            });
         } catch (SQLException e){
             UtilsDB.onSQLException(onSQLExceptionMessage);
         }
     }
 
-    void editDBProductName(Product product, String newName) throws SQLException{
+    void onOverlappingProducts(Product oldProduct, String newName) {
+        final String onSQLExceptionMessage = "Database Error while editing item";
+
+        // In this case we renamed a product to an already existing item with the same expiration date
+        expirationList.stream().filter(
+                product -> product.getProductName().equals(newName) && product.getExpirationDate().equals(oldProduct.getExpirationDate())
+        ).forEach(product -> {
+            int newQuantity = product.getQuantity() + oldProduct.getQuantity();
+            try {
+                editDBProductQuantity(product, newQuantity);
+                product.setQuantity(newQuantity);
+                removeDBProduct(oldProduct);
+                expirationListTableView.getItems().remove(expirationListTableView.getSelectionModel().getSelectedIndex());
+            } catch (SQLException ex) {
+                UtilsDB.onSQLException(onSQLExceptionMessage);
+            }
+        });
+    }
+
+    void editDBProductName(Product oldProduct, String newName) throws SQLException{
         // TODO move this function to UtilsDB.java
         // TODO add resolution of SQLIntegrityConstraintViolationException
+
         try (
                 Connection connection = dataSource.getConnection();
                 PreparedStatement updateProduct = connection.prepareStatement("UPDATE products SET " +
                         "productName=?" +
                         " WHERE productName=?" +
                         " AND " +
-                        "expirationDate=?")) {
+                        "expirationDate=?")
+        ) {
             updateProduct.setString(1, newName);
-            updateProduct.setString(2, product.getProductName());
-            updateProduct.setDate(3, Date.valueOf(product.getExpirationDate()));
+            updateProduct.setString(2, oldProduct.getProductName());
+            updateProduct.setDate(3, Date.valueOf(oldProduct.getExpirationDate()));
             updateProduct.executeUpdate();
+        } catch (SQLIntegrityConstraintViolationException exception) {
+            onOverlappingProducts(oldProduct, newName);
         }
     }
 
@@ -259,6 +253,8 @@ public class MainWindowController {
             updateProduct.setString(6, oldProduct.getProductName());
             updateProduct.setDate(7, Date.valueOf(oldProduct.getExpirationDate()));
             updateProduct.executeUpdate();
+        } catch (SQLIntegrityConstraintViolationException exception) {
+            onOverlappingProducts(oldProduct, newProduct.getProductName());
         }
     }
 
