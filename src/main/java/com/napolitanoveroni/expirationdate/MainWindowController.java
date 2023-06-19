@@ -17,26 +17,16 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
-import net.fortuna.ical4j.data.CalendarOutputter;
-import net.fortuna.ical4j.model.Calendar;
-import net.fortuna.ical4j.model.PropertyList;
 import net.fortuna.ical4j.model.component.VEvent;
-import net.fortuna.ical4j.model.property.*;
-import net.fortuna.ical4j.validate.ValidationException;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.sql.*;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
 public class MainWindowController {
-
-
 
     @FXML private TableColumn<Product, LocalDate> expirationListExpirationDateColumn;
 
@@ -60,10 +50,10 @@ public class MainWindowController {
 
         try {
             dbConnection();
-            expirationList = getBoughtProductData();
+            expirationList = getProductData();
         } catch (SQLException e) {
             expirationList = FXCollections.observableArrayList();
-            new Alert(Alert.AlertType.ERROR, "Database Error: while loading data").showAndWait();
+            UtilsDB.onSQLException("Database Error: while loading data");
         }
 
         expirationListTableView.setItems(expirationList);
@@ -74,7 +64,7 @@ public class MainWindowController {
 
     }
 
-    private void dbConnection() {
+    private void dbConnection() throws SQLException {
         HikariConfig config = new HikariConfig();
         config.setDriverClassName(UtilsDB.JDBC_Driver);
         config.setJdbcUrl(UtilsDB.JDBC_URL);
@@ -82,7 +72,7 @@ public class MainWindowController {
         dataSource = new HikariDataSource(config);
     }
 
-    ObservableList<Product> getBoughtProductData() throws SQLException {
+    ObservableList<Product> getProductData() throws SQLException {
         ObservableList<Product> products = FXCollections.observableArrayList();
 
         try (
@@ -93,7 +83,7 @@ public class MainWindowController {
             while (rs.next()) {
                 products.add(new Product(
                         rs.getString("productName"),
-                        convertSQLDateToLocalDate(rs.getDate("expirationDate")),
+                        UtilsDB.convertSQLDateToLocalDate(rs.getDate("expirationDate")),
                         rs.getString("categoryName"),
                         rs.getInt("quantity"),
                         rs.getDouble("price")
@@ -101,109 +91,28 @@ public class MainWindowController {
             }
         }
 
-
         return products;
-    }
-
-    public static LocalDate convertSQLDateToLocalDate(Date SQLDate) {
-        java.util.Date date = new java.util.Date(SQLDate.getTime());
-        return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
     }
 
     private void editableCols() {
         expirationListProductColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-        expirationListProductColumn.setOnEditCommit(e ->
-        {
-            Product oldProduct = e.getTableView().getItems().get(e.getTablePosition().getRow());
-            Product backupOldProduct = new Product(oldProduct);
-            String newName = e.getNewValue();
+        expirationListProductColumn.setOnEditCommit(this::onEditProductColumn);
 
-            try {
-                editDBProductName(oldProduct, newName);
-                oldProduct.setProductName(newName);
-                removeDBProduct(backupOldProduct);
-            } catch (SQLIntegrityConstraintViolationException exception) {
-                expirationList.stream().filter(
-                        product -> product.getProductName().equals(newName) && product.getExpirationDate().equals(oldProduct.getExpirationDate())
-                ).forEach(product -> {
-                    int newQuantity = product.getQuantity() + oldProduct.getQuantity();
-                    try {
-                        editDBProductQuantity(product, newQuantity);
-                        product.setQuantity(newQuantity);
-                        removeDBProduct(backupOldProduct);
-                        expirationListTableView.getItems().remove(expirationListTableView.getSelectionModel().getSelectedIndex());
-                    } catch (SQLException ex) {
-                        new Alert(Alert.AlertType.ERROR, "Database Error while editing item").showAndWait();
-                    }
-                });
-            } catch (SQLException exception){
-                new Alert(Alert.AlertType.ERROR, "Database Error while editing item").showAndWait();
-            }
-
-        });
+        expirationListExpirationDateColumn.setOnEditStart(this::onEditExpirationDateColumn);
 
         expirationListProductColumn.setEditable(true);
-    }
-
-    private VEvent oneHourSingleEvent() {
-        //Create a new calendar event that starts on 5th March 2021 at midday Australian Eastern Daylight Savings Time and goes for 1 hour.
-        VEvent vEvent = new VEvent();
-        PropertyList eventProps = new PropertyList(vEvent.getProperties());
-        java.time.ZonedDateTime now = java.time.ZonedDateTime.now();
-
-        //Create a unique ID for the event
-        String uidTimestamp = java.time.format.DateTimeFormatter
-                .ofPattern("uuuuMMdd'T'hhmmssXX")
-                .format(now);
-        //In the real world this could be a number from a generated sequence:
-        String uidSequence = "/" + (int) Math.ceil(Math.random() * 1000);
-        String uidDomain = "@your.domain.com";
-        eventProps.add(new Uid(uidTimestamp + uidSequence + uidDomain));
-
-
-        eventProps.add(new DtStart<>(LocalDate.now()));
-        eventProps.add(new Duration(java.time.Duration.ofHours(1)));
-
-        //Add title and description
-        eventProps.add(new Summary("The title of the event"));
-        eventProps.add(new Description("Some longer description of the event."));
-        return vEvent;
     }
 
     @FXML
     void onCalendarExpirationListButtonClicked(ActionEvent ignoredEvent) {
         // TODO calendar integration
-        Calendar calendar = new Calendar();
-        calendar.getProperties().add(new ProdId("-//Ben Fortuna//iCal4j 1.0//EN"));
-        //calendar.getProperties().add(CalScale.);
 
-        VEvent event = oneHourSingleEvent();
+        // initialise as an all-day event..
+        VEvent christmas = new VEvent(LocalDate.of(LocalDate.now().getYear(), 12, 25), "Christmas Day");
 
-        calendar.getComponents().add(event);
+        net.fortuna.ical4j.model.Calendar cal = new net.fortuna.ical4j.model.Calendar();
+        cal.getComponents().add(christmas);
 
-        String filePath = "mymeeting.ics";
-        FileOutputStream fout = null;
-        try {
-
-            fout = new FileOutputStream(filePath);
-            CalendarOutputter outputter = new CalendarOutputter();
-            outputter.output(calendar, fout);
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (ValidationException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (fout != null) {
-                try {
-                    fout.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
     }
 
     void showNoProductSelectedAlert() {
@@ -224,7 +133,7 @@ public class MainWindowController {
 
             expirationListTableView.getItems().remove(selectedIndex);
         } catch (SQLException e) {
-            new Alert(Alert.AlertType.ERROR, "Database Error while removing item").showAndWait();
+            UtilsDB.onSQLException("Database Error while removing item");
         } catch (NoSuchElementException e) {
             showNoProductSelectedAlert();
         }
@@ -243,39 +152,66 @@ public class MainWindowController {
         return selectedIndex;
     }
 
-    @FXML
+    void onEditProductColumn(TableColumn.CellEditEvent<Product, String> event) {
+        final String onSQLExceptionMessage = "Database Error while editing item";
+
+        Product oldProduct = event.getTableView().getItems().get(event.getTablePosition().getRow());
+        String newName = event.getNewValue();
+
+        try {
+            editDBProductName(oldProduct, newName);
+            oldProduct.setProductName(newName);
+        } catch (SQLIntegrityConstraintViolationException exception) {
+            // In this case we renamed a product to an already existing item with the same expiration date
+            expirationList.stream().filter(
+                    product -> product.getProductName().equals(newName) && product.getExpirationDate().equals(oldProduct.getExpirationDate())
+            ).forEach(product -> {
+                int newQuantity = product.getQuantity() + oldProduct.getQuantity();
+                try {
+                    editDBProductQuantity(product, newQuantity);
+                    product.setQuantity(newQuantity);
+                    removeDBProduct(oldProduct);
+                    expirationListTableView.getItems().remove(expirationListTableView.getSelectionModel().getSelectedIndex());
+                } catch (SQLException ex) {
+                    UtilsDB.onSQLException(onSQLExceptionMessage);
+                }
+            });
+        } catch (SQLException exception){
+            UtilsDB.onSQLException(onSQLExceptionMessage);
+        }
+    }
+
     void onEditExpirationDateColumn(TableColumn.CellEditEvent<Product, LocalDate> event) {
+        final String onSQLExceptionMessage = "Database Error while editing item";
+
         int selectedIndex = selectedIndex();
         Product oldProduct = event.getRowValue();
-        Product editedProduct = actionOnProduct(event.getRowValue());
-        try{
+        Product editedProduct = actionOnProduct(oldProduct);
+        try {
             editDBProductAllField(oldProduct, editedProduct);
             expirationListTableView.getItems().set(selectedIndex, editedProduct);
         } catch (SQLIntegrityConstraintViolationException e){
             expirationList.stream().filter(
                     product -> product.getProductName().equals(editedProduct.getProductName()) && product.getExpirationDate().equals(editedProduct.getExpirationDate())
             ).forEach(product -> {
-                int newQuantity = product.getQuantity() + editedProduct.getQuantity();
+                int newQuantity = product.getQuantity() + oldProduct.getQuantity();
                 try {
                     editDBProductQuantity(product, newQuantity);
                     product.setQuantity(newQuantity);
+                    removeDBProduct(oldProduct);
+                    expirationListTableView.getItems().remove(expirationListTableView.getSelectionModel().getSelectedIndex());
                 } catch (SQLException ex) {
-                    new Alert(Alert.AlertType.ERROR, "Database Error while editing item").showAndWait();
+                    UtilsDB.onSQLException(onSQLExceptionMessage);
                 }
             });
-
-            try{
-                removeDBProduct(oldProduct);
-                expirationListTableView.getItems().remove(selectedIndex);
-            } catch (SQLException exception){
-                new Alert(Alert.AlertType.ERROR, "Database Error while editing item").showAndWait();
-            }
         } catch (SQLException e){
-            new Alert(Alert.AlertType.ERROR, "Database Error while editing item").showAndWait();
+            UtilsDB.onSQLException(onSQLExceptionMessage);
         }
     }
 
     void editDBProductName(Product product, String newName) throws SQLException{
+        // TODO move this function to UtilsDB.java
+        // TODO add resolution of SQLIntegrityConstraintViolationException
         try (
                 Connection connection = dataSource.getConnection();
                 PreparedStatement updateProduct = connection.prepareStatement("UPDATE products SET " +
@@ -291,6 +227,7 @@ public class MainWindowController {
     }
 
     void editDBProductQuantity(Product product, int newQuantity) throws SQLException{
+        // TODO move this to UtilsDB.java
         try (
                 Connection connection = dataSource.getConnection();
                 PreparedStatement updateProduct = connection.prepareStatement("UPDATE products SET " +
@@ -305,6 +242,8 @@ public class MainWindowController {
         }
     }
     void editDBProductAllField(Product oldProduct, Product newProduct) throws SQLException {
+        // TODO move this function to UtilsDB.java
+        // TODO add resolution of SQLIntegrityConstraintViolationException
         try (
             Connection connection = dataSource.getConnection();
             PreparedStatement updateProduct = connection.prepareStatement("UPDATE products SET productName=?, expirationDate=?, " +
