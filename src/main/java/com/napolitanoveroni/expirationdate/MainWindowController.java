@@ -14,7 +14,6 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import net.fortuna.ical4j.model.component.VEvent;
@@ -22,6 +21,7 @@ import net.fortuna.ical4j.model.component.VEvent;
 import java.io.IOException;
 import java.sql.*;
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -58,6 +58,8 @@ public class MainWindowController {
 
         expirationListTableView.setItems(expirationList);
         editableCols();
+
+        sortTableView(expirationListTableView);
 
         //        expirationList.addListener(); TODO add listener to expirationList
 
@@ -178,6 +180,14 @@ public class MainWindowController {
         } catch (SQLException e){
             UtilsDB.onSQLException(onSQLExceptionMessage);
         }
+
+        sortTableView(expirationListTableView);
+    }
+
+    void productDBUpdate(Product product, PreparedStatement updateProduct) throws SQLException {
+        updateProduct.setString(2, product.getProductName());
+        updateProduct.setDate(3, Date.valueOf(product.getExpirationDate()));
+        updateProduct.executeUpdate();
     }
 
     void onOverlappingProducts(Product oldProduct, String newName) {
@@ -212,9 +222,7 @@ public class MainWindowController {
                         "expirationDate=?")
         ) {
             updateProduct.setString(1, newName);
-            updateProduct.setString(2, oldProduct.getProductName());
-            updateProduct.setDate(3, Date.valueOf(oldProduct.getExpirationDate()));
-            updateProduct.executeUpdate();
+            productDBUpdate(oldProduct, updateProduct);
         } catch (SQLIntegrityConstraintViolationException exception) {
             onOverlappingProducts(oldProduct, newName);
         }
@@ -230,9 +238,7 @@ public class MainWindowController {
                         " AND " +
                         "expirationDate=?")) {
             updateProduct.setInt(1, newQuantity);
-            updateProduct.setString(2, product.getProductName());
-            updateProduct.setDate(3, Date.valueOf(product.getExpirationDate()));
-            updateProduct.executeUpdate();
+            productDBUpdate(product, updateProduct);
         }
     }
     void editDBProductAllField(Product oldProduct, Product newProduct) throws SQLException {
@@ -311,6 +317,8 @@ public class MainWindowController {
         catch (SQLException e) {
             new Alert(Alert.AlertType.ERROR, "Database Error: while adding item").showAndWait();
         }
+
+        sortTableView(expirationListTableView);
     }
 
     void insertDBProduct(Product product) throws SQLException {
@@ -334,9 +342,6 @@ public class MainWindowController {
         // TODO database connection with recipes
     }
 
-    /**
-     *
-     */
     @FXML
     void onEnterShoppingTextField(ActionEvent event) {  // TODO the new item is placed before the checked items
         CheckBox newCheckBox = new CheckBox();
@@ -352,9 +357,6 @@ public class MainWindowController {
         GridPane newGridPane = new GridPane();
         newGridPane.setPadding(new Insets(10, 10, 0, 10));
         newGridPane.setAlignment(Pos.TOP_CENTER);
-        newGridPane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-        newGridPane.setMinSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
-        newGridPane.setPrefSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
 
         shoppingListVBox.getChildren().add(newGridPane);
         newGridPane.addRow(newGridPane.getRowCount(), newCheckBox, newTextField, newButton);
@@ -411,6 +413,8 @@ public class MainWindowController {
                 }
             }
         }
+
+        sortTableView(expirationListTableView);
     }
 
     @FXML
@@ -429,6 +433,10 @@ public class MainWindowController {
         if (children.isEmpty()) {
             onEnterShoppingTextField(ignoredEvent);
         }
+    }
+
+    void sortTableView(TableView<Product> expirationListTableView){
+        FXCollections.sort(expirationListTableView.getItems(), Comparator.comparing(Product::getExpirationDate));
     }
 
 
