@@ -1,7 +1,5 @@
 package com.napolitanoveroni.expirationdate;
 
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -26,6 +24,8 @@ import java.util.ListIterator;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+import static com.napolitanoveroni.expirationdate.UtilsDB.*;
+
 public class MainWindowController {
 
     @FXML private TableColumn<Product, LocalDate> expirationListExpirationDateColumn;
@@ -41,7 +41,7 @@ public class MainWindowController {
     @FXML private VBox shoppingListVBox;
 
 
-    private HikariDataSource dataSource;
+
 
     @FXML
     public void initialize() {
@@ -64,36 +64,6 @@ public class MainWindowController {
         //        expirationList.addListener(); TODO add listener to expirationList
 
 
-    }
-
-    private void dbConnection() throws SQLException {
-        HikariConfig config = new HikariConfig();
-        config.setDriverClassName(PersonalConfigDB.JDBC_Driver);
-        config.setJdbcUrl(PersonalConfigDB.JDBC_URL);
-        config.setLeakDetectionThreshold(2000);
-        dataSource = new HikariDataSource(config);
-    }
-
-    ObservableList<Product> getProductData() throws SQLException {
-        ObservableList<Product> products = FXCollections.observableArrayList();
-
-        try (
-                Connection connection = dataSource.getConnection();
-                PreparedStatement getProducts = connection.prepareStatement("SELECT * FROM products");
-                ResultSet rs = getProducts.executeQuery()
-        ) {
-            while (rs.next()) {
-                products.add(new Product(
-                        rs.getString("productName"),
-                        UtilsDB.convertSQLDateToLocalDate(rs.getDate("expirationDate")),
-                        rs.getString("categoryName"),
-                        rs.getInt("quantity"),
-                        rs.getDouble("price")
-                ));
-            }
-        }
-
-        return products;
     }
 
     private void editableCols() {
@@ -161,7 +131,7 @@ public class MainWindowController {
         String newName = event.getNewValue();
 
         try {
-            editDBProductName(oldProduct, newName);
+            editDBProductName(oldProduct, newName, this);
             oldProduct.setProductName(newName);
         } catch (SQLException exception){
             UtilsDB.onSQLException(onSQLExceptionMessage);
@@ -175,7 +145,7 @@ public class MainWindowController {
         Product oldProduct = event.getRowValue();
         Product editedProduct = actionOnProduct(oldProduct);
         try {
-            editDBProductAllField(oldProduct, editedProduct);
+            editDBProductAllField(oldProduct, editedProduct, this);
             expirationListTableView.getItems().set(selectedIndex, editedProduct);
         } catch (SQLException e){
             UtilsDB.onSQLException(onSQLExceptionMessage);
@@ -184,18 +154,12 @@ public class MainWindowController {
         sortTableView(expirationListTableView);
     }
 
-    void productDBUpdate(Product product, PreparedStatement updateProduct) throws SQLException {
-        updateProduct.setString(2, product.getProductName());
-        updateProduct.setDate(3, Date.valueOf(product.getExpirationDate()));
-        updateProduct.executeUpdate();
-    }
-
-    void onOverlappingProducts(Product oldProduct, String newName) {
+    void onOverlappingProducts(Product oldProduct, String newName, LocalDate newExpirationDate) {
         final String onSQLExceptionMessage = "Database Error while editing item";
 
         // In this case we renamed a product to an already existing item with the same expiration date
         expirationList.stream().filter(
-                product -> product.getProductName().equals(newName) && product.getExpirationDate().equals(oldProduct.getExpirationDate())
+                product -> product.getProductName().equals(newName) && product.getExpirationDate().equals(newExpirationDate)
         ).forEach(product -> {
             int newQuantity = product.getQuantity() + oldProduct.getQuantity();
             try {
@@ -207,61 +171,6 @@ public class MainWindowController {
                 UtilsDB.onSQLException(onSQLExceptionMessage);
             }
         });
-    }
-
-    void editDBProductName(Product oldProduct, String newName) throws SQLException{
-        // TODO move this function to UtilsDB.java
-        // TODO add resolution of SQLIntegrityConstraintViolationException
-
-        try (
-                Connection connection = dataSource.getConnection();
-                PreparedStatement updateProduct = connection.prepareStatement("UPDATE products SET " +
-                        "productName=?" +
-                        " WHERE productName=?" +
-                        " AND " +
-                        "expirationDate=?")
-        ) {
-            updateProduct.setString(1, newName);
-            productDBUpdate(oldProduct, updateProduct);
-        } catch (SQLIntegrityConstraintViolationException exception) {
-            onOverlappingProducts(oldProduct, newName);
-        }
-    }
-
-    void editDBProductQuantity(Product product, int newQuantity) throws SQLException{
-        // TODO move this to UtilsDB.java
-        try (
-                Connection connection = dataSource.getConnection();
-                PreparedStatement updateProduct = connection.prepareStatement("UPDATE products SET " +
-                        "quantity=?" +
-                        " WHERE productName=?" +
-                        " AND " +
-                        "expirationDate=?")) {
-            updateProduct.setInt(1, newQuantity);
-            productDBUpdate(product, updateProduct);
-        }
-    }
-    void editDBProductAllField(Product oldProduct, Product newProduct) throws SQLException {
-        // TODO move this function to UtilsDB.java
-        // TODO add resolution of SQLIntegrityConstraintViolationException
-        try (
-            Connection connection = dataSource.getConnection();
-            PreparedStatement updateProduct = connection.prepareStatement("UPDATE products SET productName=?, expirationDate=?, " +
-                         "categoryName=?, quantity=?, price=?" +
-                         " WHERE productName=?" +
-                         " AND " +
-                         "expirationDate=?")) {
-            updateProduct.setString(1, newProduct.getProductName());
-            updateProduct.setDate(2, Date.valueOf(newProduct.getExpirationDate()));
-            updateProduct.setString(3, newProduct.getCategoryName());
-            updateProduct.setInt(4, newProduct.getQuantity());
-            updateProduct.setDouble(5, newProduct.getPrice());
-            updateProduct.setString(6, oldProduct.getProductName());
-            updateProduct.setDate(7, Date.valueOf(oldProduct.getExpirationDate()));
-            updateProduct.executeUpdate();
-        } catch (SQLIntegrityConstraintViolationException exception) {
-            onOverlappingProducts(oldProduct, newProduct.getProductName());
-        }
     }
 
     public Product actionOnProduct(Product initialValue) {
@@ -321,22 +230,6 @@ public class MainWindowController {
         sortTableView(expirationListTableView);
     }
 
-    void insertDBProduct(Product product) throws SQLException {
-        try (
-            Connection connection = dataSource.getConnection();
-            PreparedStatement insertProduct =
-                    connection.prepareStatement("INSERT INTO products (productName, " + "expirationDate, " +
-                            "categoryName, " + "quantity, price) VALUES (?, ?, ?, ?, ?)")
-        ) {
-            insertProduct.setString(1, product.getProductName());
-            insertProduct.setDate(2, Date.valueOf(product.getExpirationDate()));
-            insertProduct.setString(3, product.getCategoryName());
-            insertProduct.setInt(4, product.getQuantity());
-            insertProduct.setDouble(5, product.getPrice());
-            insertProduct.executeUpdate();
-        }
-    }
-
     @FXML
     void onRecipesExpirationListButtonClicked(ActionEvent ignoredEvent) {
         // TODO database connection with recipes
@@ -373,17 +266,7 @@ public class MainWindowController {
         }
     }
 
-    void removeDBProduct(Product product) throws SQLException {
-        try (
-            Connection connection = dataSource.getConnection();
-            PreparedStatement deleteProduct = connection.prepareStatement("DELETE FROM products WHERE productName=? " +
-                    "AND expirationDate=?")
-        ) {
-            deleteProduct.setString(1, product.getProductName());
-            deleteProduct.setDate(2, Date.valueOf(product.getExpirationDate()));
-            deleteProduct.executeUpdate();
-        }
-    }
+
 
     @FXML
     void onCheckBoxChecked(ActionEvent event) {
