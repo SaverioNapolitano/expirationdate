@@ -40,8 +40,7 @@ dependencies {
     implementation 'mysql:mysql-connector-java:8.0.33'
     // https://mvnrepository.com/artifact/com.zaxxer/HikariCP
     implementation 'com.zaxxer:HikariCP:5.0.1'
-    // https://mvnrepository.com/artifact/org.mnode.ical4j/ical4j
-    implementation 'org.mnode.ical4j:ical4j:4.0.0-beta8'
+    implementation 'net.sf.biweekly:biweekly:0.6.7'
 
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")

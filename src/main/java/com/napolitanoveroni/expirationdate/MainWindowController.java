@@ -1,5 +1,14 @@
 package com.napolitanoveroni.expirationdate;
 
+import biweekly.ICalVersion;
+import biweekly.ICalendar;
+import biweekly.component.VAlarm;
+import biweekly.component.VEvent;
+import biweekly.io.text.ICalWriter;
+import biweekly.parameter.Related;
+import biweekly.property.Summary;
+import biweekly.property.Trigger;
+import biweekly.util.Duration;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -9,15 +18,20 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
-import net.fortuna.ical4j.model.component.VEvent;
 
+import java.awt.*;
+import java.io.File;
 import java.io.IOException;
-import java.sql.*;
+import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.ListIterator;
@@ -74,12 +88,35 @@ public class MainWindowController {
     void onCalendarExpirationListButtonClicked(ActionEvent ignoredEvent) {
         // TODO calendar integration
 
-        // initialise as an all-day event..
-        VEvent christmas = new VEvent(LocalDate.of(LocalDate.now().getYear(), 12, 25), "Christmas Day");
+        Product selectedProduct = expirationList.get(selectedIndex());
 
-        net.fortuna.ical4j.model.Calendar cal = new net.fortuna.ical4j.model.Calendar();
-        cal.getComponents().add(christmas);
+        ICalendar iCal = new ICalendar();
+        VEvent event = new VEvent();
+        Summary summary = event.setSummary(selectedProduct.getProductName());
+        summary.setLanguage("en-us");
 
+        event.setDateStart(DateUtils.asDate(selectedProduct.getExpirationDate()), false);
+
+        Duration triggerDuration = Duration.builder().prior(true).days(1).build();
+        Trigger trigger = new Trigger(triggerDuration, Related.START);
+        VAlarm alarm = VAlarm.display(trigger, selectedProduct.getProductName() + " is expiring.");
+        event.addAlarm(alarm);
+
+        iCal.addEvent(event);
+
+        File file = new File("temp.ics");
+        try (ICalWriter writer = new ICalWriter(file, ICalVersion.V2_0)) {
+            writer.write(iCal);
+        } catch (IOException e) {
+            new Alert(Alert.AlertType.ERROR, "Error during calendar event creation").showAndWait();
+        }
+
+        Desktop desktop = Desktop.getDesktop();
+        try {
+            desktop.open(file);
+        } catch (IOException e) {
+            new Alert(Alert.AlertType.ERROR, "Error while running calendar event").showAndWait();
+        }
     }
 
     void showNoProductSelectedAlert() {
