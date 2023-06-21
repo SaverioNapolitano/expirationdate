@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="550.0" prefWidth="798.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1">
+   <top>
+      <MenuBar BorderPane.alignment="CENTER">
+        <menus>
+          <Menu mnemonicParsing="false" text="File">
+            <items>
+              <MenuItem mnemonicParsing="false" text="Close" />
+            </items>
+          </Menu>
+          <Menu mnemonicParsing="false" text="Edit">
+            <items>
+              <MenuItem mnemonicParsing="false" text="Delete" />
+            </items>
+          </Menu>
+          <Menu mnemonicParsing="false" text="Help">
+            <items>
+              <MenuItem mnemonicParsing="false" text="About" />
+            </items>
+          </Menu>
+        </menus>
+      </MenuBar>
+   </top>
+   <left>
+      <Button mnemonicParsing="false" text="&lt;" BorderPane.alignment="CENTER" />
+   </left>
+   <right>
+      <Button mnemonicParsing="false" text="&gt;" BorderPane.alignment="CENTER" />
+   </right>
+   <center>
+      <ScrollPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+         <content>
+            <VBox alignment="TOP_CENTER">
+               <children>
+                  <TextField alignment="CENTER" promptText="Add title..." />
+                  <Separator prefWidth="200.0" />
+                  <HBox>
+                     <children>
+                        <Label text="Duration:" />
+                        <TextField />
+                     </children>
+                  </HBox>
+                  <Separator prefWidth="200.0" />
+                  <HBox>
+                     <children>
+                        <Label text="Portions:" />
+                        <TextField />
+                     </children>
+                  </HBox>
+                  <Separator prefWidth="200.0" />
+                  <HBox>
+                     <children>
+                        <Label text="Category:" />
+                        <ComboBox prefWidth="150.0" />
+                     </children>
+                  </HBox>
+                  <Separator prefWidth="200.0" />
+                  <Label text="Tag" />
+                  <GridPane>
+                    <columnConstraints>
+                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                     <children>
+                        <TextField promptText="Add tag..." />
+                     </children>
+                  </GridPane>
+                  <Separator prefWidth="200.0" />
+                  <Label text="Ingredients" />
+                  <HBox alignment="CENTER">
+                     <children>
+                        <Label text="Ingredients you have:" />
+                        <ProgressIndicator progress="0.0" />
+                     </children>
+                  </HBox>
+                  <TextField promptText="Add ingredient..." />
+                  <Separator prefWidth="200.0" />
+                  <Label text="Steps" />
+                  <TextArea prefHeight="200.0" prefWidth="200.0" />
+               </children>
+            </VBox>
+         </content>
+      </ScrollPane>
+   </center>
+</BorderPane>
