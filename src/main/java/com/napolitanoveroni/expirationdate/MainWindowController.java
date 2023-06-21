@@ -84,22 +84,17 @@ public class MainWindowController {
         expirationListProductColumn.setEditable(true);
     }
 
-    @FXML
-    void onCalendarExpirationListButtonClicked(ActionEvent ignoredEvent) {
-        // TODO calendar integration
-
-        Product selectedProduct = expirationList.get(selectedIndex());
-
+    void addCalendarEvent(Product product) {
         ICalendar iCal = new ICalendar();
         VEvent event = new VEvent();
-        Summary summary = event.setSummary(selectedProduct.getProductName());
+        Summary summary = event.setSummary(product.getProductName());
         summary.setLanguage("en-us");
 
-        event.setDateStart(DateUtils.asDate(selectedProduct.getExpirationDate()), false);
+        event.setDateStart(DateUtils.asDate(product.getExpirationDate()), false);
 
         Duration triggerDuration = Duration.builder().prior(true).days(1).build();
         Trigger trigger = new Trigger(triggerDuration, Related.START);
-        VAlarm alarm = VAlarm.display(trigger, selectedProduct.getProductName() + " is expiring.");
+        VAlarm alarm = VAlarm.display(trigger, product.getProductName() + " is expiring.");
         event.addAlarm(alarm);
 
         iCal.addEvent(event);
@@ -116,6 +111,16 @@ public class MainWindowController {
             desktop.open(file);
         } catch (IOException e) {
             new Alert(Alert.AlertType.ERROR, "Error while running calendar event").showAndWait();
+        }
+    }
+
+    @FXML
+    void onCalendarExpirationListButtonClicked(ActionEvent ignoredEvent) {
+        try {
+            Product selectedProduct = expirationList.get(selectedIndex());
+            addCalendarEvent(selectedProduct);
+        } catch (NoSuchElementException e) {
+            showNoProductSelectedAlert();
         }
     }
 
@@ -148,7 +153,7 @@ public class MainWindowController {
      *
      * @return the index of the selected person
      */
-    int selectedIndex() {
+    int selectedIndex() throws NoSuchElementException {
         int selectedIndex = expirationListTableView.getSelectionModel().getSelectedIndex();
         if (selectedIndex < 0) {
             throw new NoSuchElementException();
