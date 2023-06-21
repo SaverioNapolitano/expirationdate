@@ -60,7 +60,7 @@
                      <content>
                         <VBox fx:id="shoppingListVBox">
                            <children>
-                              <GridPane fx:id="shoppingListGridPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" vgap="10.0">
+                              <GridPane fx:id="shoppingListGridPane" alignment="TOP_CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" vgap="10.0">
                                  <columnConstraints>
                                     <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" />
                                     <ColumnConstraints hgrow="SOMETIMES" />
