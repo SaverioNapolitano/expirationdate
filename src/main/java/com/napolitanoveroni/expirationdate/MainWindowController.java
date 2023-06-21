@@ -6,6 +6,7 @@ import biweekly.component.VAlarm;
 import biweekly.component.VEvent;
 import biweekly.io.text.ICalWriter;
 import biweekly.parameter.Related;
+import biweekly.property.Organizer;
 import biweekly.property.Summary;
 import biweekly.property.Trigger;
 import biweekly.util.Duration;
@@ -105,6 +106,37 @@ public class MainWindowController {
 
      */
 
+    void createExecuteICS(ICalendar iCalendar){
+        File file = new File("temp.ics");
+        try (ICalWriter writer = new ICalWriter(file, ICalVersion.V2_0)) {
+            writer.write(iCalendar);
+        } catch (IOException e) {
+            new Alert(Alert.AlertType.ERROR, "Error during calendar event creation").showAndWait();
+        }
+
+        Desktop desktop = Desktop.getDesktop();
+        try {
+            desktop.open(file);
+        } catch (IOException e) {
+            new Alert(Alert.AlertType.ERROR, "Error while running calendar event").showAndWait();
+        }
+    }
+
+    void deleteCalendarEvent(Product product){
+
+        String uid = product.getProductName() + product.getExpirationDate().toString();
+        ICalendar iCal = new ICalendar();
+        iCal.setMethod("CANCEL");
+        VEvent event = new VEvent();
+        event.setOrganizer(new Organizer("expirationdate", "")); //the organizer of the existing event
+        event.setUid(uid); //the UID of the existing event
+        event.setSequence(0);
+        iCal.addEvent(event);
+
+        createExecuteICS(iCal);
+
+    }
+
     void addCalendarEvent(Product product) {
         ICalendar iCal = new ICalendar();
         VEvent event = new VEvent();
@@ -120,19 +152,13 @@ public class MainWindowController {
 
         iCal.addEvent(event);
 
-        File file = new File("temp.ics");
-        try (ICalWriter writer = new ICalWriter(file, ICalVersion.V2_0)) {
-            writer.write(iCal);
-        } catch (IOException e) {
-            new Alert(Alert.AlertType.ERROR, "Error during calendar event creation").showAndWait();
-        }
+        String uid = product.getProductName() + product.getExpirationDate().toString();
 
-        Desktop desktop = Desktop.getDesktop();
-        try {
-            desktop.open(file);
-        } catch (IOException e) {
-            new Alert(Alert.AlertType.ERROR, "Error while running calendar event").showAndWait();
-        }
+        event.setOrganizer(new Organizer("expirationdate", ""));
+        event.setSequence(0);
+        event.setUid(uid);
+
+        createExecuteICS(iCal);
     }
 
     void showNoProductSelectedAlert() {
@@ -234,6 +260,7 @@ public class MainWindowController {
             int selectedIndex = selectedIndex();
             Product removeProduct = expirationListTableView.getItems().get(selectedIndex);
 
+            deleteCalendarEvent(removeProduct);
             removeDBProduct(removeProduct);
 
             expirationListTableView.getItems().remove(selectedIndex);
@@ -242,6 +269,8 @@ public class MainWindowController {
         } catch (NoSuchElementException e) {
             showNoProductSelectedAlert();
         }
+
+
     }
 
     void onEditExpirationDateColumn(TableColumn.CellEditEvent<Product, LocalDate> event) {
