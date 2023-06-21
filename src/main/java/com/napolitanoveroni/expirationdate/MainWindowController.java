@@ -7,6 +7,7 @@ import biweekly.component.VEvent;
 import biweekly.io.text.ICalWriter;
 import biweekly.parameter.Related;
 import biweekly.property.Organizer;
+import biweekly.property.Status;
 import biweekly.property.Summary;
 import biweekly.property.Trigger;
 import biweekly.util.Duration;
@@ -130,7 +131,13 @@ public class MainWindowController {
         VEvent event = new VEvent();
         event.setOrganizer(new Organizer("expirationdate", "")); //the organizer of the existing event
         event.setUid(uid); //the UID of the existing event
-        event.setSequence(0);
+        event.setSequence(1);
+        event.setStatus(Status.cancelled());
+        Summary summary = event.setSummary(product.getProductName());
+        summary.setLanguage("en-us");
+
+        event.setDateStart(DateUtils.asDate(product.getExpirationDate()), false);
+
         iCal.addEvent(event);
 
         createExecuteICS(iCal);
@@ -155,7 +162,7 @@ public class MainWindowController {
         String uid = product.getProductName() + product.getExpirationDate().toString();
 
         event.setOrganizer(new Organizer("expirationdate", ""));
-        event.setSequence(0);
+        event.setSequence(1);
         event.setUid(uid);
 
         createExecuteICS(iCal);
