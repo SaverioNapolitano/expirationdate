@@ -17,10 +17,10 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.GridPane;
@@ -42,19 +42,32 @@ import static com.napolitanoveroni.expirationdate.UtilsDB.*;
 
 public class MainWindowController {
 
-    @FXML private TableColumn<Product, LocalDate> expirationListExpirationDateColumn;
+    @FXML
+    private TableColumn<Product, LocalDate> expirationListExpirationDateColumn;
 
-    @FXML private TableColumn<Product, String> expirationListProductColumn;
+    @FXML
+    private TableColumn<Product, String> expirationListProductColumn;
 
-    @FXML private TableView<Product> expirationListTableView;
+    @FXML
+    private TableView<Product> expirationListTableView;
 
-    @FXML private GridPane shoppingListGridPane;
+    @FXML
+    private GridPane shoppingListGridPane;
 
     ObservableList<Product> expirationList;
 
-    @FXML private VBox shoppingListVBox;
+    @FXML
+    private VBox shoppingListVBox;
 
     private boolean cancelEditProduct = false;
+
+    /*
+
+
+    WINDOW INITIALIZING METHODS
+
+
+     */
 
     @FXML
     public void initialize() {
@@ -83,6 +96,14 @@ public class MainWindowController {
 
         expirationListProductColumn.setEditable(true);
     }
+
+    /*
+
+
+    UTILITIES
+
+
+     */
 
     void addCalendarEvent(Product product) {
         ICalendar iCal = new ICalendar();
@@ -114,38 +135,12 @@ public class MainWindowController {
         }
     }
 
-    @FXML
-    void onCalendarExpirationListButtonClicked(ActionEvent ignoredEvent) {
-        try {
-            Product selectedProduct = expirationList.get(selectedIndex());
-            addCalendarEvent(selectedProduct);
-        } catch (NoSuchElementException e) {
-            showNoProductSelectedAlert();
-        }
-    }
-
     void showNoProductSelectedAlert() {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle("No Selection");
         alert.setHeaderText("No Product Selected");
         alert.setContentText("Please select a product in the table.");
         alert.showAndWait();
-    }
-
-    @FXML
-    void onDeleteExpirationListButtonClicked(ActionEvent ignoredEvent) {
-        try {
-            int selectedIndex = selectedIndex();
-            Product removeProduct = expirationListTableView.getItems().get(selectedIndex);
-
-            removeDBProduct(removeProduct);
-
-            expirationListTableView.getItems().remove(selectedIndex);
-        } catch (SQLException e) {
-            UtilsDB.onSQLException("Database Error while removing item");
-        } catch (NoSuchElementException e) {
-            showNoProductSelectedAlert();
-        }
     }
 
     /**
@@ -161,46 +156,11 @@ public class MainWindowController {
         return selectedIndex;
     }
 
-    void onEditProductColumn(TableColumn.CellEditEvent<Product, String> event) {
-        final String onSQLExceptionMessage = "Database Error while editing item";
-
-        Product oldProduct = event.getTableView().getItems().get(event.getTablePosition().getRow());
-        String newName = event.getNewValue();
-
-        try {
-            editDBProductName(oldProduct, newName, this);
-            oldProduct.setProductName(newName);
-        } catch (SQLException exception){
-            UtilsDB.onSQLException(onSQLExceptionMessage);
-        }
-    }
-
-    void onEditExpirationDateColumn(TableColumn.CellEditEvent<Product, LocalDate> event) {
-        final String onSQLExceptionMessage = "Database Error while editing item";
-
-        int selectedIndex = selectedIndex();
-        Product oldProduct = event.getRowValue();
-        Product editedProduct = actionOnProduct(oldProduct);
-
-        if (!editedProduct.getProductName().equals("")) {
-            try {
-                editDBProductAllField(oldProduct, editedProduct, this);
-                expirationListTableView.getItems().set(selectedIndex, editedProduct);
-            } catch (SQLException e) {
-                UtilsDB.onSQLException(onSQLExceptionMessage);
-            }
-        }
-
-        sortTableView(expirationListTableView);
-    }
-
     void onOverlappingProducts(Product oldProduct, String newName, LocalDate newExpirationDate) {
         final String onSQLExceptionMessage = "Database Error while editing item";
 
         // In this case we renamed a product to an already existing item with the same expiration date
-        expirationList.stream().filter(
-                product -> product.getProductName().equals(newName) && product.getExpirationDate().equals(newExpirationDate)
-        ).forEach(product -> {
+        expirationList.stream().filter(product -> product.getProductName().equals(newName) && product.getExpirationDate().equals(newExpirationDate)).forEach(product -> {
             int newQuantity = product.getQuantity() + oldProduct.getQuantity();
             try {
                 editDBProductQuantity(product, newQuantity);
@@ -246,6 +206,77 @@ public class MainWindowController {
         throw new RuntimeException("Error while editing a product!");
     }
 
+    void sortTableView(TableView<Product> expirationListTableView) {
+        FXCollections.sort(expirationListTableView.getItems(), Comparator.comparing(Product::getExpirationDate));
+    }
+
+    /*
+
+
+    UI INTERACTION - LEFT (EXPIRATION LIST) VIEW
+
+
+     */
+
+    @FXML
+    void onCalendarExpirationListButtonClicked(ActionEvent ignoredEvent) {
+        try {
+            Product selectedProduct = expirationList.get(selectedIndex());
+            addCalendarEvent(selectedProduct);
+        } catch (NoSuchElementException e) {
+            showNoProductSelectedAlert();
+        }
+    }
+
+    @FXML
+    void onDeleteExpirationListButtonClicked(ActionEvent ignoredEvent) {
+        try {
+            int selectedIndex = selectedIndex();
+            Product removeProduct = expirationListTableView.getItems().get(selectedIndex);
+
+            removeDBProduct(removeProduct);
+
+            expirationListTableView.getItems().remove(selectedIndex);
+        } catch (SQLException e) {
+            UtilsDB.onSQLException("Database Error while removing item");
+        } catch (NoSuchElementException e) {
+            showNoProductSelectedAlert();
+        }
+    }
+
+    void onEditExpirationDateColumn(TableColumn.CellEditEvent<Product, LocalDate> event) {
+        final String onSQLExceptionMessage = "Database Error while editing item";
+
+        int selectedIndex = selectedIndex();
+        Product oldProduct = event.getRowValue();
+        Product editedProduct = actionOnProduct(oldProduct);
+
+        if (!editedProduct.getProductName().equals("")) {
+            try {
+                editDBProductAllField(oldProduct, editedProduct, this);
+                expirationListTableView.getItems().set(selectedIndex, editedProduct);
+            } catch (SQLException e) {
+                UtilsDB.onSQLException(onSQLExceptionMessage);
+            }
+        }
+
+        sortTableView(expirationListTableView);
+    }
+
+    void onEditProductColumn(TableColumn.CellEditEvent<Product, String> event) {
+        final String onSQLExceptionMessage = "Database Error while editing item";
+
+        Product oldProduct = event.getTableView().getItems().get(event.getTablePosition().getRow());
+        String newName = event.getNewValue();
+
+        try {
+            editDBProductName(oldProduct, newName, this);
+            oldProduct.setProductName(newName);
+        } catch (SQLException exception) {
+            UtilsDB.onSQLException(onSQLExceptionMessage);
+        }
+    }
+
     @FXML
     void onNewExpirationListButtonClicked(ActionEvent ignoredEvent) {
         Product edited = actionOnProduct(new Product());
@@ -275,6 +306,14 @@ public class MainWindowController {
     void onRecipesExpirationListButtonClicked(ActionEvent ignoredEvent) {
         // TODO database connection with recipes
     }
+
+    /*
+
+
+    UI INTERACTION - RIGHT (SHOPPING LIST) VIEW
+
+
+     */
 
     @FXML
     void onEnterShoppingTextField(ActionEvent event) {  // TODO the new item is placed before the checked items
@@ -307,8 +346,6 @@ public class MainWindowController {
         }
     }
 
-
-
     @FXML
     void onCheckBoxChecked(ActionEvent event) {
         if (event.getSource() instanceof CheckBox checkBox) {
@@ -337,7 +374,6 @@ public class MainWindowController {
                         checkBox.setSelected(false);
                         cancelEditProduct = false;
                     }
-
                 } catch (SQLException e) {
                     new Alert(Alert.AlertType.ERROR, "Database Error: while adding item").showAndWait();
                 }
@@ -364,10 +400,4 @@ public class MainWindowController {
             onEnterShoppingTextField(ignoredEvent);
         }
     }
-
-    void sortTableView(TableView<Product> expirationListTableView){
-        FXCollections.sort(expirationListTableView.getItems(), Comparator.comparing(Product::getExpirationDate));
-    }
-
-
 }
