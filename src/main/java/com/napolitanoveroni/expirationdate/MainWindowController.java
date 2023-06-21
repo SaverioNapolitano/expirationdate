@@ -123,6 +123,17 @@ public class MainWindowController {
         }
     }
 
+    void editCalendarEvent(Product oldProduct, Product newProduct){
+        //TODO: see https://datatracker.ietf.org/doc/html/rfc5546#page-80 for updating an existing event
+        deleteCalendarEvent(oldProduct);
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        addCalendarEvent(newProduct);
+    }
+
     void deleteCalendarEvent(Product product){
 
         String uid = product.getProductName() + product.getExpirationDate().toString();
@@ -289,12 +300,14 @@ public class MainWindowController {
 
         if (!editedProduct.getProductName().equals("")) {
             try {
+                editCalendarEvent(oldProduct, editedProduct);
                 editDBProductAllField(oldProduct, editedProduct, this);
                 expirationListTableView.getItems().set(selectedIndex, editedProduct);
             } catch (SQLException e) {
                 UtilsDB.onSQLException(onSQLExceptionMessage);
             }
         }
+
 
         sortTableView(expirationListTableView);
     }
@@ -305,7 +318,11 @@ public class MainWindowController {
         Product oldProduct = event.getTableView().getItems().get(event.getTablePosition().getRow());
         String newName = event.getNewValue();
 
+        Product editedProduct = new Product(oldProduct);
+        editedProduct.setProductName(newName);
+
         try {
+            editCalendarEvent(oldProduct, editedProduct);
             editDBProductName(oldProduct, newName, this);
             oldProduct.setProductName(newName);
         } catch (SQLException exception) {
