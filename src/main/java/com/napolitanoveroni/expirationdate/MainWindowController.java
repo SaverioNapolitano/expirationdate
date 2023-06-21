@@ -263,16 +263,6 @@ public class MainWindowController {
      */
 
     @FXML
-    void onCalendarExpirationListButtonClicked(ActionEvent ignoredEvent) {
-        try {
-            Product selectedProduct = expirationList.get(selectedIndex());
-            addCalendarEvent(selectedProduct);
-        } catch (NoSuchElementException e) {
-            showNoProductSelectedAlert();
-        }
-    }
-
-    @FXML
     void onDeleteExpirationListButtonClicked(ActionEvent ignoredEvent) {
         try {
             int selectedIndex = selectedIndex();
@@ -336,6 +326,7 @@ public class MainWindowController {
         if (!edited.getProductName().equals("")) {
             try {
                 insertDBProduct(edited);
+                addCalendarEvent(edited);
                 expirationList.add(edited);
             } catch (SQLIntegrityConstraintViolationException e) {
                 expirationList.stream().filter(product -> product.getProductName().equals(edited.getProductName()) && product.getExpirationDate().equals(edited.getExpirationDate())).forEach(product -> {
@@ -422,6 +413,7 @@ public class MainWindowController {
                     Product edited = actionOnProduct(new Product(productName));
                     if (!cancelEditProduct && !edited.getProductName().equals("")) {
                         insertDBProduct(edited);
+                        addCalendarEvent(edited);
                         expirationList.add(edited);
                     } else {
                         checkBox.setSelected(false);

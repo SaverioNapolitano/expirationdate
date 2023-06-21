@@ -41,7 +41,6 @@
                      <children>
                         <Button mnemonicParsing="false" onAction="#onNewExpirationListButtonClicked" text="New" />
                         <Button mnemonicParsing="false" onAction="#onDeleteExpirationListButtonClicked" text="Delete" />
-                        <Button alignment="TOP_CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#onCalendarExpirationListButtonClicked" prefHeight="26.0" prefWidth="80.0" text="Calendar..." />
                       <Button mnemonicParsing="false" onAction="#onRecipesExpirationListButtonClicked" text="Recipes" />
                      </children>
                   </HBox>
