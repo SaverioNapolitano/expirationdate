@@ -1,6 +1,7 @@
 package com.napolitanoveroni.expirationdate;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 public class Product {
     String productName;
@@ -79,5 +80,20 @@ public class Product {
         setCategoryName(other.getCategoryName());
         setQuantity(other.getQuantity());
         setPrice(other.getPrice());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        Product product = (Product) o;
+        return quantity == product.quantity && Double.compare(product.price, price) == 0 && Objects.equals(productName, product.productName) && Objects.equals(expirationDate, product.expirationDate) && Objects.equals(categoryName, product.categoryName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(productName, expirationDate, categoryName, quantity, price);
     }
 }

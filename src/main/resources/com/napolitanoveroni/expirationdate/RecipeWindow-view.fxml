@@ -20,43 +20,43 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="586.0" prefWidth="846.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="515.0" prefWidth="665.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.napolitanoveroni.expirationdate.RecipeWindowController">
    <top>
       <MenuBar BorderPane.alignment="CENTER">
         <menus>
           <Menu mnemonicParsing="false" text="File">
             <items>
-              <MenuItem mnemonicParsing="false" text="Import..." />
-                  <MenuItem mnemonicParsing="false" text="Export..." />
+              <MenuItem mnemonicParsing="false" onAction="#onImportMenuItemClicked" text="Import..." />
+                  <MenuItem mnemonicParsing="false" onAction="#onExportMenuItemClicked" text="Export..." />
             </items>
           </Menu>
           <Menu mnemonicParsing="false" text="Edit">
             <items>
-              <MenuItem mnemonicParsing="false" text="Add" />
-                  <MenuItem mnemonicParsing="false" text="Delete" />
+              <MenuItem mnemonicParsing="false" onAction="#onAddMenuItemClicked" text="Add" />
+                  <MenuItem mnemonicParsing="false" onAction="#onDeleteMenuItemClicked" text="Delete" />
             </items>
           </Menu>
         </menus>
       </MenuBar>
    </top>
    <left>
-      <Button mnemonicParsing="false" text="&lt;" BorderPane.alignment="CENTER">
+      <Button mnemonicParsing="false" onAction="#onLeftButtonClicked" text="&lt;" BorderPane.alignment="CENTER">
          <BorderPane.margin>
             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
          </BorderPane.margin></Button>
    </left>
    <right>
-      <Button mnemonicParsing="false" text="&gt;" BorderPane.alignment="CENTER">
+      <Button mnemonicParsing="false" onAction="#onRightButtonClicked" text="&gt;" BorderPane.alignment="CENTER">
          <BorderPane.margin>
             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
          </BorderPane.margin></Button>
    </right>
    <center>
-      <ScrollPane fitToWidth="true" BorderPane.alignment="CENTER">
+      <ScrollPane fitToWidth="true" prefHeight="556.0" prefWidth="619.0" BorderPane.alignment="CENTER">
          <content>
             <VBox alignment="TOP_CENTER">
                <children>
-                  <TextField alignment="CENTER" promptText="Add title...">
+                  <TextField fx:id="titleTextField" alignment="CENTER" onAction="#onEnterTitleTextField" promptText="Add title...">
                      <VBox.margin>
                         <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                      </VBox.margin>
@@ -71,33 +71,28 @@
                   <HBox alignment="CENTER">
                      <children>
                         <Label text="Duration:" />
-                        <TextField>
+                        <TextField fx:id="durationTextField" onAction="#onEnterDurationTextField" promptText="Type duration...">
                            <HBox.margin>
                               <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                            </HBox.margin></TextField>
-                        <Label text="Minutes">
-                           <HBox.margin>
-                              <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                           </HBox.margin>
-                        </Label>
+                        <ComboBox fx:id="unitComboBox" onAction="#onUnitComboBoxChosen" prefWidth="150.0" />
                      </children>
                   </HBox>
                   <Separator />
                   <HBox alignment="CENTER">
                      <children>
                         <Label text="Portions:" />
-                        <TextField promptText="Type quantity...">
+                        <TextField fx:id="portionsTextField" onAction="#onEnterPortionsTextField" promptText="Type portions...">
                            <HBox.margin>
                               <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                            </HBox.margin></TextField>
-                        <ComboBox editable="true" prefWidth="150.0" promptText="Type unit of measurement..." />
                      </children>
                   </HBox>
                   <Separator />
                   <HBox alignment="CENTER">
                      <children>
                         <Label text="Category:" />
-                        <ComboBox>
+                        <ComboBox fx:id="categoryComboBox" onAction="#onCategoryComboBoxChosen">
                            <HBox.margin>
                               <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                            </HBox.margin></ComboBox>
@@ -105,7 +100,7 @@
                   </HBox>
                   <Separator />
                   <Label text="Tag" />
-                  <GridPane>
+                  <GridPane fx:id="tagGridPane">
                     <columnConstraints>
                       <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                       <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -116,7 +111,7 @@
                       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                     </rowConstraints>
                      <children>
-                        <ComboBox editable="true" promptText="Add tag...">
+                        <ComboBox fx:id="firstTagComboBox" editable="true" onAction="#onEnterTagComboBox" promptText="Add tag...">
                            <GridPane.margin>
                               <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                            </GridPane.margin>
@@ -131,16 +126,36 @@
                   <HBox alignment="CENTER">
                      <children>
                         <Label text="Ingredients you have:" />
-                        <ProgressIndicator progress="0.0" />
+                        <ProgressIndicator fx:id="ingredientsProgressIndicator" prefHeight="41.0" prefWidth="53.0" progress="0.0" />
                      </children>
                   </HBox>
-                  <TextField promptText="Add ingredient...">
+                  <VBox fx:id="ingredientVBox">
                      <VBox.margin>
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                     </VBox.margin></TextField>
+                     </VBox.margin>
+                     <children>
+                        <HBox alignment="CENTER">
+                           <children>
+                              <TextField promptText="Add ingredient..." />
+                              <Label text="Quantity:">
+                                 <HBox.margin>
+                                    <Insets left="10.0" right="5.0" />
+                                 </HBox.margin>
+                              </Label>
+                              <TextField promptText="Add quantity" />
+                              <Label text="Unit:">
+                                 <HBox.margin>
+                                    <Insets left="10.0" right="5.0" />
+                                 </HBox.margin>
+                              </Label>
+                              <ComboBox editable="true" prefWidth="150.0" promptText="Add unit of measuerement" />
+                           </children>
+                        </HBox>
+                     </children>
+                  </VBox>
                   <Separator />
                   <Label text="Steps" />
-                  <TextArea promptText="Add recipe steps...">
+                  <TextArea fx:id="stepsTextArea" promptText="Add recipe steps...">
                      <VBox.margin>
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                      </VBox.margin>

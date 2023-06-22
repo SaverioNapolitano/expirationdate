@@ -7,8 +7,10 @@ import javafx.collections.ObservableList;
 import javafx.scene.control.Alert;
 
 import java.sql.*;
+import java.sql.Date;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.*;
 
 public class UtilsDB {
     static private HikariDataSource dataSource;
@@ -50,6 +52,83 @@ public class UtilsDB {
         }
 
         return products;
+    }
+
+    static ObservableList<Recipe> getRecipeData() throws SQLException {
+        ObservableList<Recipe> returnValue = FXCollections.observableArrayList();
+
+        Map<String, List<Ingredient>> ingredientsMap = new HashMap<>();
+        Map<String, List<String>> tagMap = new HashMap<>();
+
+        try (
+                Connection connection = dataSource.getConnection();
+                PreparedStatement getIngredients = connection.prepareStatement(
+                    "SELECT consist.* " +
+                        "FROM recipe " +
+                            "NATURAL JOIN consist ");
+                ResultSet rs = getIngredients.executeQuery()
+        ) {
+            while (rs.next()) {
+                String title = rs.getString("title");
+                Ingredient ingredient = new Ingredient(
+                        rs.getString("ingredient"),
+                        rs.getDouble("quantity"),
+                        rs.getString("unit_of_measurement")
+                );
+
+                if (!ingredientsMap.containsKey(title))  {
+                    ingredientsMap.put(title, new ArrayList<>());
+                }
+                ingredientsMap.get(title).add(ingredient);
+            }
+        }
+
+        try (
+                Connection connection = dataSource.getConnection();
+                PreparedStatement getTag = connection.prepareStatement(
+                        "SELECT tag.* " +
+                                "FROM recipe " +
+                                "NATURAL JOIN tag ");
+                ResultSet rs = getTag.executeQuery()
+        ) {
+            while (rs.next()) {
+                String title = rs.getString("title");
+                String tag = rs.getString("tag");
+
+                if (!tagMap.containsKey(title))  {
+                    tagMap.put(title, new ArrayList<>());
+                }
+                tagMap.get(title).add(tag);
+            }
+        }
+
+        try (
+                Connection connection = dataSource.getConnection();
+                PreparedStatement getRecipe = connection.prepareStatement(
+                        "SELECT * " +
+                        "FROM recipe ");
+                ResultSet rs = getRecipe.executeQuery()
+        ) {
+            while (rs.next()) {
+                String title = rs.getString("title");
+
+                Optional<List<Ingredient>> optionalIngredientList = Optional.ofNullable(ingredientsMap.get(title));
+                Optional<List<String>> optionalTagList = Optional.ofNullable(tagMap.get(title));
+
+                returnValue.add(new Recipe(
+                        title,
+                        rs.getInt("duration"),
+                        (rs.getInt("unit") == 0) ? durationUnit.MIN : durationUnit.H,
+                        rs.getInt("portions"),
+                        rs.getString("category"),
+                        rs.getString("steps"),
+                        optionalIngredientList.orElse(new ArrayList<>()),
+                        optionalTagList.orElse(new ArrayList<>())
+                ));
+            }
+        }
+
+        return returnValue;
     }
 
     static void productDBUpdate(Product product, PreparedStatement updateProduct) throws SQLException {
@@ -134,6 +213,63 @@ public class UtilsDB {
             deleteProduct.setString(1, product.getProductName());
             deleteProduct.setDate(2, Date.valueOf(product.getExpirationDate()));
             deleteProduct.executeUpdate();
+        }
+    }
+
+    static void insertDBTag(String title, String tag) throws SQLException {
+        try (
+                Connection connection = dataSource.getConnection();
+                PreparedStatement insertTag =
+                        connection.prepareStatement(
+                            "INSERT INTO tag (title, tag) VALUES (?, ?)")
+        ) {
+            insertTag.setString(1, title);
+            insertTag.setString(2, tag);
+            insertTag.executeUpdate();
+        }
+    }
+
+    static void removeDBTag(String title, String tag) throws SQLException {
+        try (
+                Connection connection = dataSource.getConnection();
+                PreparedStatement deleteTag = connection.prepareStatement("DELETE FROM tag WHERE title=? " +
+                        "AND tag=?")
+        ) {
+            deleteTag.setString(1, title);
+            deleteTag.setString(2, tag);
+            deleteTag.executeUpdate();
+        }
+    }
+
+    static void editDBRecipeCategory(String title, String category) throws SQLException{
+
+        try (
+                Connection connection = dataSource.getConnection();
+                PreparedStatement updateRecipe = connection.prepareStatement("UPDATE recipe SET " +
+                        "category=?" +
+                        " WHERE title=?")
+        ) {
+            updateRecipe.setString(1, category);
+            updateRecipe.setString(2, title);
+            updateRecipe.executeUpdate();
+        } catch (SQLIntegrityConstraintViolationException ignored) {
+
+        }
+    }
+
+    static void editDBRecipeUnit(String title, int unit) throws SQLException{
+
+        try (
+                Connection connection = dataSource.getConnection();
+                PreparedStatement updateRecipe = connection.prepareStatement("UPDATE recipe SET " +
+                        "unit=?" +
+                        " WHERE title=?")
+        ) {
+            updateRecipe.setInt(1, unit);
+            updateRecipe.setString(2, title);
+            updateRecipe.executeUpdate();
+        } catch (SQLIntegrityConstraintViolationException ignored) {
+
         }
     }
 }
