@@ -110,39 +110,65 @@ public class RecipeWindowController {
 
         lastTag.getEditor().setText(tag);
 
-        onEnterTagComboBox(new ActionEvent(firstTagComboBox, null));
+        onEnterTagComboBox(new ActionEvent(lastTag, null));
     }
 
     @FXML
     void onEnterTagComboBox(ActionEvent event) {
-        int index = lastTagGridIndex() + 1;
-
         ComboBox<String> comboBox = (ComboBox<String>)event.getSource();
+        int index = tagGridPane.getChildren().indexOf(comboBox);
+
+        Recipe recipe = recipes.get(recipesIndex);
+        String title = recipe.getTitle();
+
         String lastTag = comboBox.getEditor().getText();
 
+        String oldTag;
+        if (index < recipe.getTagList().size()) {
+            oldTag = recipe.getTagList().get(index);
+        } else {
+            oldTag = lastTag;
+        }
+
         if (lastTag.isEmpty()) {
+            for (int i = index; i < tagGridPane.getChildren().size() - 1; i++) {
+                int columnIndex = i % tagGridPane.getColumnCount();
+                int rowIndex = i / tagGridPane.getColumnCount();
+                GridPane.setConstraints(tagGridPane.getChildren().get(i + 1), columnIndex, rowIndex);
+            }
+            tagGridPane.getChildren().remove(index);
+
+            try {
+                removeDBTag(title, oldTag);
+                recipe.getTagList().remove(index);
+            } catch (SQLException ignored) {}
+
             return;
         }
 
-        ComboBox<String> newComboBoxTag = new ComboBox<>();
-        newComboBoxTag.setEditable(true);
-        newComboBoxTag.getEditor().setPromptText("Add tag...");
-        newComboBoxTag.setOnAction(this::onEnterTagComboBox);
+        if (!((ComboBox<String>)(tagGridPane.getChildren().get(tagGridPane.getChildren().size() - 1))).getEditor().getText().isEmpty()) {
+            int lastIndex = tagGridPane.getChildren().size();
+            ComboBox<String> newComboBoxTag = new ComboBox<>();
+            newComboBoxTag.setEditable(true);
+            newComboBoxTag.getEditor().setPromptText("Add tag...");
+            newComboBoxTag.setOnAction(this::onEnterTagComboBox);
 
-        int columnIndex = index % tagGridPane.getColumnCount();
-        int rowIndex = index / tagGridPane.getColumnCount();
+            int columnIndex = lastIndex % tagGridPane.getColumnCount();
+            int rowIndex = lastIndex / tagGridPane.getColumnCount();
 
-        tagGridPane.add(newComboBoxTag, columnIndex, rowIndex);
-
-        String title = recipes.get(recipesIndex).getTitle();
+            tagGridPane.add(newComboBoxTag, columnIndex, rowIndex);
+        }
 
         try {
-            try {   // TODO check
-                removeDBTag(title, lastTag);
+            try {
+                removeDBTag(title, oldTag);
             } catch (SQLException ignored) {}
             insertDBTag(title, lastTag);
 
-            recipes.get(recipesIndex).getTagList().add(comboBox.getValue());
+            if (index < recipe.getTagList().size()) {
+                recipe.getTagList().remove(index);
+            }
+            recipe.getTagList().add(index, lastTag);
         } catch (SQLException e) {
             onSQLException("Error while changing tags.");
         }
