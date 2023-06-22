@@ -6,7 +6,7 @@ import java.util.Objects;
 
 public class Recipe {
     String title;
-    int duration;
+    double duration;
     durationUnit unit;
     int portions;
     String category;
@@ -22,7 +22,7 @@ public class Recipe {
         this.unit = unit;
     }
 
-    public Recipe(String title, int duration, durationUnit unit, int portions, String category, String steps,
+    public Recipe(String title, double duration, durationUnit unit, int portions, String category, String steps,
                   List<Ingredient> ingredientList, List<String> tagList) {
         this.title = title;
         this.duration = duration;
@@ -53,11 +53,11 @@ public class Recipe {
         this.title = title;
     }
 
-    public int getDuration() {
+    public double getDuration() {
         return duration;
     }
 
-    public void setDuration(int duration) {
+    public void setDuration(double duration) {
         this.duration = duration;
     }
 

@@ -117,7 +117,7 @@ public class UtilsDB {
 
                 returnValue.add(new Recipe(
                         title,
-                        rs.getInt("duration"),
+                        rs.getDouble("duration"),
                         (rs.getInt("unit") == 0) ? durationUnit.MIN : durationUnit.H,
                         rs.getInt("portions"),
                         rs.getString("category"),
@@ -272,4 +272,53 @@ public class UtilsDB {
 
         }
     }
+
+    static void editDBRecipeDuration(String title, double duration) throws SQLException{
+
+        try (
+                Connection connection = dataSource.getConnection();
+                PreparedStatement updateRecipe = connection.prepareStatement("UPDATE recipe SET " +
+                        "duration=?" +
+                        " WHERE title=?")
+        ) {
+            updateRecipe.setDouble(1, duration);
+            updateRecipe.setString(2, title);
+            updateRecipe.executeUpdate();
+        } catch (SQLIntegrityConstraintViolationException ignored) {
+
+        }
+    }
+
+    static void editDBRecipePortion(String title, int portions) throws SQLException{
+
+        try (
+                Connection connection = dataSource.getConnection();
+                PreparedStatement updateRecipe = connection.prepareStatement("UPDATE recipe SET " +
+                        "portions=?" +
+                        " WHERE title=?")
+        ) {
+            updateRecipe.setInt(1, portions);
+            updateRecipe.setString(2, title);
+            updateRecipe.executeUpdate();
+        } catch (SQLIntegrityConstraintViolationException ignored) {
+
+        }
+    }
+
+    /*TODO
+    static void editDBRecipeTitle(String oldTitle, String newTitle) throws SQLException{
+
+        try (
+                Connection connection = dataSource.getConnection();
+                PreparedStatement updateRecipe = connection.prepareStatement("UPDATE recipe SET " +
+                        "duration=?" +
+                        " WHERE title=?")
+        ) {
+            updateRecipe.setDouble(1, duration);
+            updateRecipe.setString(2, title);
+            updateRecipe.executeUpdate();
+        } catch (SQLIntegrityConstraintViolationException ignored) {
+
+        }
+    }*/
 }

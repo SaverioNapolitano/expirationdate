@@ -78,7 +78,7 @@ public class RecipeWindowController {
 
     void setRecipe(Recipe recipe) {
         titleTextField.setText(recipe.getTitle());
-        durationTextField.setText(Integer.toString(recipe.getDuration()));
+        durationTextField.setText(Double.toString(recipe.getDuration()));
         unitComboBox.setItems(FXCollections.observableArrayList("minutes", "hours"));
         unitComboBoxSelected = switch (recipe.getUnit()) {
             case MIN -> 0;
@@ -172,6 +172,7 @@ public class RecipeWindowController {
 
         try {
             editDBRecipeCategory(recipes.get(recipesIndex).getTitle(), categoryComboBoxSelected);
+            recipes.get(recipesIndex).setCategory(categoryComboBoxSelected);
         } catch (SQLException e) {
             onSQLException("Error while updating category");
         }
@@ -179,42 +180,64 @@ public class RecipeWindowController {
 
     @FXML
     void onDeleteMenuItemClicked(ActionEvent event) {
+        //TODO removeDBREcipe
 
+        recipes.remove(recipesIndex);
     }
 
     @FXML
     void onEnterDurationTextField(ActionEvent event) {
-
+        Recipe recipe = recipes.get(recipesIndex);
+        try {
+            editDBRecipeDuration(recipe.getTitle(), recipe.getDuration());
+        } catch (SQLException e) {
+            onSQLException("Error while updating duration.");
+        }
     }
 
     @FXML
     void onEnterPortionsTextField(ActionEvent event) {
+        Recipe recipe = recipes.get(recipesIndex);
 
+        try{
+            editDBRecipePortion(recipe.getTitle(), recipe.getPortions());
+        } catch (SQLException e) {
+            onSQLException("Error while updating portions.");
+        }
     }
 
     @FXML
     void onEnterTitleTextField(ActionEvent event) {
-
+        Recipe recipe = recipes.get(recipesIndex);
     }
 
     @FXML
     void onExportMenuItemClicked(ActionEvent event) {
-
+        //TODO see JSON
     }
 
     @FXML
     void onImportMenuItemClicked(ActionEvent event) {
-
+        //TODO see JSON
     }
 
     @FXML
     void onLeftButtonClicked(ActionEvent event) {
+        if(recipesIndex - 1 < 0){
+            recipesIndex = recipes.size() - 1;
+        } else {
+            recipesIndex--;
+        }
 
+        Recipe recipe = recipes.get(recipesIndex);
+        setRecipe(recipe);
     }
 
     @FXML
     void onRightButtonClicked(ActionEvent event) {
-
+        recipesIndex = (recipesIndex + 1) % recipes.size();
+        Recipe recipe = recipes.get(recipesIndex);
+        setRecipe(recipe);
     }
 
     @FXML
@@ -224,6 +247,11 @@ public class RecipeWindowController {
 
         try {
             editDBRecipeUnit(recipes.get(recipesIndex).getTitle(), unitComboBoxSelected);
+            recipes.get(recipesIndex).setUnit(switch (unitComboBoxSelected) {
+                case 0 -> durationUnit.MIN;
+                default -> durationUnit.H;
+            });
+
         } catch (SQLException e) {
             onSQLException("Error while updating category");
         }
