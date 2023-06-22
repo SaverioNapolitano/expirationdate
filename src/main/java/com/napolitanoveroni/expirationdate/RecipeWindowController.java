@@ -1,5 +1,6 @@
 package com.napolitanoveroni.expirationdate;
 
+import javafx.animation.AnimationTimer;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -56,6 +57,8 @@ public class RecipeWindowController {
 
     private String categoryComboBoxSelected;
 
+    private AnimationTimer timer;
+
     @FXML
     public void initialize() {
 
@@ -74,6 +77,24 @@ public class RecipeWindowController {
         }
 
         recipesIndex = 0;
+
+        initializeTimer();
+    }
+
+    private void initializeTimer(){
+        timer = new AnimationTimer() {
+
+            private long lastUpdate = 0 ;
+
+            @Override
+            public void handle(long now) {
+                if(now - lastUpdate >= 500_000_000){
+                    stepsTextAreaAutoSave();
+                    lastUpdate = now;
+                }
+            }
+        };
+        timer.start();
     }
 
     void setRecipe(Recipe recipe) {
@@ -206,7 +227,7 @@ public class RecipeWindowController {
 
     @FXML
     void onDeleteMenuItemClicked(ActionEvent event) {
-        //TODO removeDBREcipe
+        //TODO removeDBRecipe
 
         recipes.remove(recipesIndex);
     }
@@ -282,5 +303,21 @@ public class RecipeWindowController {
             onSQLException("Error while updating category");
         }
     }
+    void stepsTextAreaAutoSave(){
+        String steps = stepsTextArea.getText();
+        Recipe recipe = recipes.get(recipesIndex);
+        if(!steps.equals(recipe.getSteps())){
+            try{
+                editDBRecipeSteps(recipe.getTitle(), steps);
+                recipe.setSteps(steps);
+            } catch (SQLException e) {
+                onSQLException("Error while auto-saving steps.");
+            }
+        }
+    }
+
+
+
+
 
 }

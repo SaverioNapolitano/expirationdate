@@ -305,6 +305,22 @@ public class UtilsDB {
         }
     }
 
+    static void editDBRecipeSteps(String title, String steps) throws SQLException{
+
+        try (
+                Connection connection = dataSource.getConnection();
+                PreparedStatement updateRecipe = connection.prepareStatement("UPDATE recipe SET " +
+                        "steps=?" +
+                        " WHERE title=?")
+        ) {
+            updateRecipe.setString(1, steps);
+            updateRecipe.setString(2, title);
+            updateRecipe.executeUpdate();
+        } catch (SQLIntegrityConstraintViolationException ignored) {
+
+        }
+    }
+
     /*TODO
     static void editDBRecipeTitle(String oldTitle, String newTitle) throws SQLException{
 
