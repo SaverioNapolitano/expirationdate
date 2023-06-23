@@ -354,7 +354,55 @@ public class UtilsDB {
         } catch (SQLIntegrityConstraintViolationException ignored) {
 
         }
+    }
 
+    static void insertDBIngredient(String title, Ingredient ingredient) throws SQLException {
+        try (
+                Connection connection = dataSource.getConnection();
+                PreparedStatement insertIngredient =
+                        connection.prepareStatement(
+                                "INSERT INTO CONSIST (title, ingredient, quantity, unit_of_measurement) VALUES " +
+                                        "(?,?,?,?)"
+                        )
+        ) {
+            insertIngredient.setString(1, title);
+            insertIngredient.setString(2, ingredient.getIngredient());
+            insertIngredient.setDouble(3, ingredient.getQuantity());
+            insertIngredient.setString(4, ingredient.getUnit_of_measurement());
+            insertIngredient.executeUpdate();
+        }
+    }
+
+    static void insertDBRecipe(Recipe recipe) throws SQLException {
+        String title = recipe.getTitle();
+
+        try (
+                Connection connection = dataSource.getConnection();
+                PreparedStatement insertRecipe =
+                        connection.prepareStatement(
+                                "INSERT INTO recipe (title, duration, unit, portions, category, steps) VALUES " +
+                                    "(?,?,?,?,?,?)"
+                        )
+        ) {
+            insertRecipe.setString(1, title);
+            insertRecipe.setDouble(2, recipe.getDuration());
+            insertRecipe.setInt(3, switch (recipe.getUnit()) {
+                case MIN -> 0;
+                case H -> 1;
+            });
+            insertRecipe.setInt(4, recipe.getPortions());
+            insertRecipe.setString(5, recipe.getCategory());
+            insertRecipe.setString(6, recipe.getSteps());
+            insertRecipe.executeUpdate();
+        }
+
+        for (Ingredient ingredient : recipe.getIngredientList()) {
+            insertDBIngredient(title, ingredient);
+        }
+
+        for (String tag : recipe.getTagList()) {
+            insertDBTag(title, tag);
+        }
     }
 
     /*TODO

@@ -5,10 +5,8 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.ProgressIndicator;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.scene.Node;
+import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 
@@ -88,7 +86,7 @@ public class RecipeWindowController {
 
             @Override
             public void handle(long now) {
-                if(now - lastUpdate >= 500_000_000 && !titleTextField.getText().isEmpty()){
+                if(now - lastUpdate >= 500_000_000 && !titleTextField.getText().isBlank()){
                     stepsTextAreaAutoSave();
                     lastUpdate = now;
                 }
@@ -151,7 +149,7 @@ public class RecipeWindowController {
             oldTag = lastTag;
         }
 
-        if (lastTag.isEmpty()) {
+        if (lastTag.isBlank()) {
             for (int i = index; i < tagGridPane.getChildren().size() - 1; i++) {
                 int columnIndex = i % tagGridPane.getColumnCount();
                 int rowIndex = i / tagGridPane.getColumnCount();
@@ -167,7 +165,7 @@ public class RecipeWindowController {
             return;
         }
 
-        if (!((ComboBox<String>)(tagGridPane.getChildren().get(tagGridPane.getChildren().size() - 1))).getEditor().getText().isEmpty()) {
+        if (!((ComboBox<String>)(tagGridPane.getChildren().get(tagGridPane.getChildren().size() - 1))).getEditor().getText().isBlank()) {
             int lastIndex = tagGridPane.getChildren().size();
             ComboBox<String> newComboBoxTag = new ComboBox<>();
             newComboBoxTag.setEditable(true);
@@ -196,6 +194,9 @@ public class RecipeWindowController {
     }
 
     void initializeCreationView() {
+        recipes.add(new Recipe());
+        recipesIndex = recipes.size() - 1;
+
         stepsTextArea.setText("");
         portionsTextField.setText("");
         durationTextField.setText("");
@@ -265,10 +266,55 @@ public class RecipeWindowController {
     }
 
     @FXML
-    void onEnterTitleTextField(ActionEvent event) {
+    void onEnterTitleTextField(ActionEvent ignoredEvent) {
         Recipe recipe = recipes.get(recipesIndex);
 
-        // TODO end title
+        String newTitle = titleTextField.getText();
+        if (newTitle.isBlank()) {
+            new Alert(Alert.AlertType.ERROR, "The title of the window can not be empty").showAndWait();
+            return;
+        }
+
+        String oldTitle = recipe.getTitle();
+
+        try {
+            if (!oldTitle.isBlank()) {
+                removeDBRecipe(oldTitle);
+                recipes.remove(recipesIndex);
+            }
+
+            List<Ingredient> newIngredientList = new ArrayList<>(); // TODO ingredients handling
+            List<String> newTagList = new ArrayList<>();
+
+            for (Node node : tagGridPane.getChildren()) {
+                ComboBox<String> comboBox = (ComboBox<String>) node;
+                String newTag = comboBox.getEditor().getText();
+                if (!newTag.isBlank()) {
+                    newTagList.add(newTag);
+                }
+            }
+
+            double newDuration = (durationTextField.getText().isBlank()) ? 0 :
+                    Double.parseDouble(durationTextField.getText());
+            int newPortions = (portionsTextField.getText().isBlank()) ? 0 :
+                    Integer.parseInt(portionsTextField.getText());
+
+            Recipe newRecipe = new Recipe(
+                    newTitle,
+                    newDuration,
+                    (unitComboBoxSelected == 0) ? durationUnit.MIN : durationUnit.H,
+                    newPortions,
+                    categoryComboBoxSelected,
+                    stepsTextArea.getText(),
+                    newIngredientList,
+                    newTagList
+            );
+
+            insertDBRecipe(newRecipe);
+            recipes.add(newRecipe);
+        } catch (SQLException e) {
+            onSQLException("Error while inserting/editing recipe");
+        }
     }
 
     @FXML
