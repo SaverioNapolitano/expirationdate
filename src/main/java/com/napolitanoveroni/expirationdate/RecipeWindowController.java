@@ -48,14 +48,9 @@ public class RecipeWindowController {
     private ObservableList<Recipe> recipes;
     int recipesIndex;
 
-    @FXML
-    private ComboBox<String> firstTagComboBox;
-
     private int unitComboBoxSelected;
 
     private String categoryComboBoxSelected;
-
-    private AnimationTimer timer;
 
     @FXML
     public void initialize() {
@@ -80,13 +75,13 @@ public class RecipeWindowController {
     }
 
     private void initializeTimer(){
-        timer = new AnimationTimer() {
+        AnimationTimer timer = new AnimationTimer() {
 
-            private long lastUpdate = 0 ;
+            private long lastUpdate = 0;
 
             @Override
             public void handle(long now) {
-                if(now - lastUpdate >= 500_000_000 && !titleTextField.getText().isBlank()){
+                if (now - lastUpdate >= 500_000_000 && !titleTextField.getText().isBlank()) {
                     stepsTextAreaAutoSave();
                     lastUpdate = now;
                 }
@@ -112,6 +107,9 @@ public class RecipeWindowController {
         categoryComboBox.getSelectionModel().select(unitComboBoxSelected);
 
         stepsTextArea.setText(recipe.getSteps());
+
+        tagGridPane.getChildren().remove(0, lastTagGridIndex());
+        GridPane.setConstraints(tagGridPane.getChildren().get(lastTagGridIndex()), 0,0);
 
         List<String> tags = new ArrayList<>(recipe.getTagList());
         recipe.setTagList(new ArrayList<>());
@@ -155,12 +153,16 @@ public class RecipeWindowController {
                 int rowIndex = i / tagGridPane.getColumnCount();
                 GridPane.setConstraints(tagGridPane.getChildren().get(i + 1), columnIndex, rowIndex);
             }
-            tagGridPane.getChildren().remove(index);
 
-            try {
-                removeDBTag(title, oldTag);
-                recipe.getTagList().remove(index);
-            } catch (SQLException ignored) {}
+            if (!oldTag.isBlank()) {
+                tagGridPane.getChildren().remove(index);
+
+                try {
+                    removeDBTag(title, oldTag);
+                    recipe.getTagList().remove(index);
+                } catch (SQLException ignored) {
+                }
+            }
 
             return;
         }
@@ -227,7 +229,7 @@ public class RecipeWindowController {
     }
 
     @FXML
-    void onDeleteMenuItemClicked(ActionEvent event) {
+    void onDeleteMenuItemClicked(ActionEvent ignoredEvent) {
         try {
             removeDBRecipe(recipes.get(recipesIndex).getTitle());
             recipes.remove(recipesIndex);
@@ -245,7 +247,7 @@ public class RecipeWindowController {
     }
 
     @FXML
-    void onEnterDurationTextField(ActionEvent event) {
+    void onEnterDurationTextField(ActionEvent ignoredEvent) {
         Recipe recipe = recipes.get(recipesIndex);
         try {
             editDBRecipeDuration(recipe.getTitle(), recipe.getDuration());
@@ -255,7 +257,7 @@ public class RecipeWindowController {
     }
 
     @FXML
-    void onEnterPortionsTextField(ActionEvent event) {
+    void onEnterPortionsTextField(ActionEvent ignoredEvent) {
         Recipe recipe = recipes.get(recipesIndex);
 
         try{
