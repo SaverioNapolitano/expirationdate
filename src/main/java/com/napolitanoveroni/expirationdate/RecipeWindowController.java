@@ -88,7 +88,7 @@ public class RecipeWindowController {
 
             @Override
             public void handle(long now) {
-                if(now - lastUpdate >= 500_000_000){
+                if(now - lastUpdate >= 500_000_000 && !titleTextField.getText().isEmpty()){
                     stepsTextAreaAutoSave();
                     lastUpdate = now;
                 }
@@ -227,9 +227,20 @@ public class RecipeWindowController {
 
     @FXML
     void onDeleteMenuItemClicked(ActionEvent event) {
-        //TODO removeDBRecipe
+        try {
+            removeDBRecipe(recipes.get(recipesIndex).getTitle());
+            recipes.remove(recipesIndex);
+            if(recipes.size() == 0){
+                initializeCreationView();
+            } else {
+                Recipe recipe = recipes.get(recipesIndex%recipes.size());
+                setRecipe(recipe);
+            }
+        } catch (SQLException e) {
+            onSQLException("Error while removing recipe.");
+        }
 
-        recipes.remove(recipesIndex);
+
     }
 
     @FXML

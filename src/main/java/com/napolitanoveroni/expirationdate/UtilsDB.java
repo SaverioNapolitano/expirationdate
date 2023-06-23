@@ -321,6 +321,42 @@ public class UtilsDB {
         }
     }
 
+    static void removeDBRecipe(String title) throws SQLException {
+        try (
+                Connection connection = dataSource.getConnection();
+                PreparedStatement removeRecipe = connection.prepareStatement("DELETE FROM TAG " +
+                        " WHERE title=?")
+        ) {
+            removeRecipe.setString(1, title);
+            removeRecipe.executeUpdate();
+        } catch (SQLIntegrityConstraintViolationException ignored) {
+
+        }
+
+        try (
+                Connection connection = dataSource.getConnection();
+                PreparedStatement removeRecipe = connection.prepareStatement("DELETE FROM CONSIST " +
+                        " WHERE title=?")
+        ) {
+            removeRecipe.setString(1, title);
+            removeRecipe.executeUpdate();
+        } catch (SQLIntegrityConstraintViolationException ignored) {
+
+        }
+
+        try (
+                Connection connection = dataSource.getConnection();
+                PreparedStatement removeRecipe = connection.prepareStatement("DELETE FROM RECIPE " +
+                        " WHERE title=?")
+        ) {
+            removeRecipe.setString(1, title);
+            removeRecipe.executeUpdate();
+        } catch (SQLIntegrityConstraintViolationException ignored) {
+
+        }
+
+    }
+
     /*TODO
     static void editDBRecipeTitle(String oldTitle, String newTitle) throws SQLException{
 
