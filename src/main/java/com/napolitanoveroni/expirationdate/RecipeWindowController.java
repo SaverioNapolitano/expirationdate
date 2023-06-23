@@ -256,6 +256,8 @@ public class RecipeWindowController {
     @FXML
     void onEnterTitleTextField(ActionEvent event) {
         Recipe recipe = recipes.get(recipesIndex);
+
+        // TODO end title
     }
 
     @FXML
@@ -315,9 +317,4 @@ public class RecipeWindowController {
             }
         }
     }
-
-
-
-
-
 }

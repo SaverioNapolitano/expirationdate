@@ -116,4 +116,3 @@ public class Recipe {
         return Objects.hash(title, duration, portions, category, steps, ingredientList, tagList);
     }
 }
-
