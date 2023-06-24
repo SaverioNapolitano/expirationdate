@@ -45,6 +45,17 @@ public class Recipe {
         tagList = new ArrayList<>();
     }
 
+    public Recipe(Recipe recipe) {
+        this.title = recipe.getTitle();
+        this.duration = recipe.getDuration();
+        this.unit = recipe.getUnit();
+        this.portions = recipe.getPortions();
+        this.category = recipe.getCategory();
+        this.steps = recipe.getSteps();
+        this.ingredientList = new ArrayList<>(recipe.getIngredientList());
+        this.tagList = new ArrayList<>(recipe.getTagList());
+    }
+
     public String getTitle() {
         return title;
     }

@@ -75,6 +75,8 @@ public class RecipeWindowController {
 
         recipesIndex = 0;
 
+        categoryComboBox.setItems(FXCollections.observableArrayList("first course", "second course", "dessert", "side dish"));
+
         initializeTimer();
     }
 
@@ -104,11 +106,10 @@ public class RecipeWindowController {
         };
         unitComboBox.getSelectionModel().select(unitComboBoxSelected);
         portionsTextField.setText(Integer.toString(recipe.getPortions()));
-        categoryComboBox.setItems(FXCollections.observableArrayList("first course", "second course", "dessert", "side dish"));
 
         categoryComboBoxSelected = recipe.getCategory();
 
-        categoryComboBox.getSelectionModel().select(unitComboBoxSelected);
+        categoryComboBox.getSelectionModel().select(categoryComboBoxSelected);
 
         stepsTextArea.setText(recipe.getSteps());
 
@@ -289,7 +290,8 @@ public class RecipeWindowController {
 
     @FXML
     void onEnterTitleTextField(ActionEvent ignoredEvent) {
-        Recipe recipe = recipes.get(recipesIndex);
+        Recipe recipe = new Recipe(recipes.get(recipesIndex));
+        String oldTitle = recipe.getTitle();
 
         String newTitle = titleTextField.getText();
         if (newTitle.isBlank()) {
@@ -297,7 +299,7 @@ public class RecipeWindowController {
             return;
         }
 
-        String oldTitle = recipe.getTitle();
+        recipe.setTitle(newTitle);
 
         try {
             if (!oldTitle.isBlank()) {
@@ -305,35 +307,8 @@ public class RecipeWindowController {
                 recipes.remove(recipesIndex);
             }
 
-            List<Ingredient> newIngredientList = new ArrayList<>(); // TODO ingredients handling
-            List<String> newTagList = new ArrayList<>();
-
-            for (Node node : tagGridPane.getChildren()) {
-                ComboBox<String> comboBox = (ComboBox<String>) node;
-                String newTag = comboBox.getEditor().getText();
-                if (!newTag.isBlank()) {
-                    newTagList.add(newTag);
-                }
-            }
-
-            double newDuration = (durationTextField.getText().isBlank()) ? 0 :
-                    Double.parseDouble(durationTextField.getText());
-            int newPortions = (portionsTextField.getText().isBlank()) ? 0 :
-                    Integer.parseInt(portionsTextField.getText());
-
-            Recipe newRecipe = new Recipe(
-                    newTitle,
-                    newDuration,
-                    (unitComboBoxSelected == 0) ? durationUnit.MIN : durationUnit.H,
-                    newPortions,
-                    categoryComboBoxSelected,
-                    stepsTextArea.getText(),
-                    newIngredientList,
-                    newTagList
-            );
-
-            insertDBRecipe(newRecipe);
-            recipes.add(newRecipe);
+            insertDBRecipe(recipe);
+            recipes.add(recipe);
         } catch (SQLException e) {
             onSQLException("Error while inserting/editing recipe");
         }
@@ -381,7 +356,7 @@ public class RecipeWindowController {
             });
 
         } catch (SQLException e) {
-            onSQLException("Error while updating category");
+            onSQLException("Error while updating unit");
         }
     }
     void stepsTextAreaAutoSave(){
