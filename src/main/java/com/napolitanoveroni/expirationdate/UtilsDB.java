@@ -405,20 +405,33 @@ public class UtilsDB {
         }
     }
 
-    /*TODO
-    static void editDBRecipeTitle(String oldTitle, String newTitle) throws SQLException{
-
+    static void updateDBIngredient(String title, Ingredient ingredient) throws SQLException {
         try (
                 Connection connection = dataSource.getConnection();
-                PreparedStatement updateRecipe = connection.prepareStatement("UPDATE recipe SET " +
-                        "duration=?" +
-                        " WHERE title=?")
+                PreparedStatement insertIngredient =
+                        connection.prepareStatement(
+                                "UPDATE CONSIST SET quantity=?, unit_of_measurement=? WHERE title=? AND ingredient=?"
+                        )
         ) {
-            updateRecipe.setDouble(1, duration);
-            updateRecipe.setString(2, title);
-            updateRecipe.executeUpdate();
-        } catch (SQLIntegrityConstraintViolationException ignored) {
-
+            insertIngredient.setDouble(1, ingredient.getQuantity());
+            insertIngredient.setString(2, ingredient.getUnit_of_measurement());
+            insertIngredient.setString(3, title);
+            insertIngredient.setString(4, ingredient.getIngredient());
+            insertIngredient.executeUpdate();
         }
-    }*/
+    }
+
+    static void removeDBIngredient(String title, Ingredient ingredient) throws SQLException {
+        try (
+                Connection connection = dataSource.getConnection();
+                PreparedStatement deleteIngredient =
+                        connection.prepareStatement(
+                                "DELETE FROM CONSIST WHERE title=? AND ingredient=?"
+                        )
+        ) {
+            deleteIngredient.setString(1, title);
+            deleteIngredient.setString(2, ingredient.getIngredient());
+            deleteIngredient.executeUpdate();
+        }
+    }
 }

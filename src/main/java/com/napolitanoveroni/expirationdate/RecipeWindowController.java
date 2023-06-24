@@ -5,9 +5,13 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
 import java.sql.SQLException;
@@ -111,10 +115,18 @@ public class RecipeWindowController {
         tagGridPane.getChildren().remove(0, lastTagGridIndex());
         GridPane.setConstraints(tagGridPane.getChildren().get(lastTagGridIndex()), 0,0);
 
-        List<String> tags = new ArrayList<>(recipe.getTagList());
+        List<String> tagsCopy = new ArrayList<>(recipe.getTagList());
         recipe.setTagList(new ArrayList<>());
-        for (String tag : tags) {
+        for (String tag : tagsCopy) {
             insertTag(tag);
+        }
+
+        clearIngredientsVBox();
+
+        List<Ingredient> ingredientsCopy = new ArrayList<>(recipe.getIngredientList());
+        recipe.setIngredientList(new ArrayList<>());
+        for (Ingredient ingredient : ingredientsCopy) {
+            addIngredient(ingredient);
         }
     }
 
@@ -196,6 +208,7 @@ public class RecipeWindowController {
     }
 
     void initializeCreationView() {
+        // TODO disable every field until a valid title is typed
         recipes.add(new Recipe());
         recipesIndex = recipes.size() - 1;
 
@@ -208,7 +221,14 @@ public class RecipeWindowController {
         ingredientsProgressIndicator.setProgress(0);
         tagGridPane.getChildren().remove(0, lastTagGridIndex());
         GridPane.setConstraints(tagGridPane.getChildren().get(lastTagGridIndex()), 0,0);
-        // TODO clear ingredients
+
+        clearIngredientsVBox();
+        onAddIngredientButtonClicked(new ActionEvent());
+    }
+
+    void clearIngredientsVBox() {
+        ObservableList<Node> ingredientVBoxChildren = ingredientVBox.getChildren();
+        ingredientVBoxChildren.remove(0, ingredientVBoxChildren.size() - 1);
     }
 
     @FXML
@@ -330,7 +350,7 @@ public class RecipeWindowController {
     }
 
     @FXML
-    void onLeftButtonClicked(ActionEvent event) {
+    void onLeftButtonClicked(ActionEvent ignoredEvent) {
         if(recipesIndex - 1 < 0){
             recipesIndex = recipes.size() - 1;
         } else {
@@ -342,7 +362,7 @@ public class RecipeWindowController {
     }
 
     @FXML
-    void onRightButtonClicked(ActionEvent event) {
+    void onRightButtonClicked(ActionEvent ignoredEvent) {
         recipesIndex = (recipesIndex + 1) % recipes.size();
         Recipe recipe = recipes.get(recipesIndex);
         setRecipe(recipe);
@@ -373,6 +393,196 @@ public class RecipeWindowController {
                 recipe.setSteps(steps);
             } catch (SQLException e) {
                 onSQLException("Error while auto-saving steps.");
+            }
+        }
+    }
+
+    void deleteIngredientUI(IngredientUI ingredientUI) {
+        ingredientVBox.getChildren().remove(ingredientUI.getContainer());
+    }
+
+    @FXML
+    void onAddIngredientButtonClicked(ActionEvent ignoredEvent) {
+        if (ingredientVBox.getChildren().get(0) instanceof HBox hBox) {
+            if (hBox.getChildren().get(0) instanceof TextField ingredientTextField) {
+                if (ingredientTextField.getText().isBlank()) {
+                    return;
+                }
+            }
+        }
+        addIngredient(new Ingredient());
+    }
+
+    void addIngredient(Ingredient ingredient) {
+        Recipe recipe = recipes.get(recipesIndex);
+        IngredientUI ingredientUI = new IngredientUI(recipe.getTitle(), ingredient);
+        ingredientVBox.getChildren().add(0, ingredientUI.getContainer());
+
+        recipe.getIngredientList().add(ingredient);
+    }
+
+    private class IngredientUI {
+        Ingredient ingredient;
+        String recipeTitle;
+        HBox container;
+        private TextField ingredientTextField;
+        private TextField quantityTextField;
+        private ComboBox<String> unitComboBox;
+        private Button deleteButton;
+
+        public void setRecipeTitle(String recipeTitle) {
+            this.recipeTitle = recipeTitle;
+        }
+
+        public void setIngredient(Ingredient ingredient) {
+            this.ingredient = ingredient;
+            ingredientTextField.setText(ingredient.getIngredient());
+
+            quantityTextField.setText(Double.toString(ingredient.getQuantity()));
+
+            unitComboBox.getEditor().setText(ingredient.getUnit_of_measurement());
+
+            if (!ingredient.getIngredient().isBlank()) {
+                quantityTextField.setDisable(false);
+                unitComboBox.setDisable(false);
+                deleteButton.setDisable(false);
+            }
+        }
+
+        private void initializeGraphics() {
+
+            ingredientTextField = new TextField();
+            ingredientTextField.setPromptText("Add ingredient...");
+
+            Label quantityLabel = new Label("Quantity: ");
+
+            quantityTextField = new TextField();
+            quantityTextField.setPromptText("Add quantity...");
+
+            Label unitLabel = new Label("Unit: ");
+
+            deleteButton = new Button("X");
+
+            unitComboBox = new ComboBox<>(FXCollections.observableArrayList("g", "kg", "ml", "l", "spoons"));
+            unitComboBox.getEditor().setPromptText("Add unit of measurement...");
+
+
+            container = new HBox(ingredientTextField, quantityLabel, quantityTextField, unitLabel, unitComboBox
+                    , deleteButton);
+
+            ingredientTextField.setOnAction(this::onEnterIngredientTextField);
+
+            quantityTextField.setDisable(true);
+            quantityTextField.setOnAction(this::onEnterQuantityTextField);
+
+            unitComboBox.setDisable(true);
+            unitComboBox.setEditable(true);
+            unitComboBox.setOnAction(this::onEnterUnitComboBox);
+
+
+            deleteButton.setDisable(true);
+            deleteButton.setOnAction(this::onDeleteIngredientButtonClicked);
+
+            container.setAlignment(Pos.CENTER);
+            container.setPrefSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
+
+            VBox.setMargin(container, new Insets(5, 0, 5, 0));
+
+            HBox.setMargin(quantityLabel, new Insets(0,5,0,10));
+            HBox.setMargin(unitLabel, new Insets(0,5,0,10));
+            HBox.setMargin(deleteButton, new Insets(0,5,0,15));
+        }
+
+        public HBox getContainer() {
+            return container;
+        }
+
+        public IngredientUI(String recipeTitle, Ingredient ingredient) {
+            setRecipeTitle(recipeTitle);
+
+            initializeGraphics();
+
+            setIngredient(ingredient);
+        }
+
+        void onEnterIngredientTextField(ActionEvent event) {
+            String newIngredient = ingredientTextField.getText();
+
+            if (!newIngredient.isBlank()) {
+                List<Ingredient> ingredientList = recipes.get(recipesIndex).getIngredientList();
+                try {
+                    try {
+                        removeDBIngredient(recipeTitle, ingredient);
+                        ingredientList.remove(ingredient);
+                    } catch (SQLException ignored) {}
+
+
+                    ingredient.setIngredient(newIngredient);
+
+                    insertDBIngredient(recipeTitle, ingredient);
+                    ingredientList.add(ingredient);
+
+                    quantityTextField.setDisable(false);
+                    unitComboBox.setDisable(false);
+                    deleteButton.setDisable(false);
+                } catch (SQLException e) {
+                    onSQLException("Error while inserting ingredient.");
+                }
+            } else {
+                new Alert(Alert.AlertType.ERROR, "Ingredient field can't be empty").showAndWait();
+                ingredientTextField.setText(ingredient.getIngredient());
+            }
+        }
+
+        void onEnterQuantityTextField(ActionEvent event) {
+            String quantityString = quantityTextField.getText();
+            if (!quantityString.isBlank()) {
+                List<Ingredient> ingredientList = recipes.get(recipesIndex).getIngredientList();
+                int ingredientIndex = ingredientList.indexOf(ingredient);
+                ingredient.setQuantity(Double.parseDouble(quantityString));
+
+                updateIngredient(ingredientIndex, ingredientList);
+            }
+        }
+
+        void onEnterUnitComboBox(ActionEvent event) {
+            String unit = unitComboBox.getEditor().getText();
+            if (!unit.isBlank()) {
+                List<Ingredient> ingredientList = recipes.get(recipesIndex).getIngredientList();
+                int ingredientIndex = ingredientList.indexOf(ingredient);
+                ingredient.setUnit_of_measurement(unit);
+
+                updateIngredient(ingredientIndex, ingredientList);
+            }
+        }
+
+        void updateIngredient(int ingredientIndex, List<Ingredient> ingredientList) {
+            try {
+                updateDBIngredient(recipeTitle, ingredient);
+
+                if (ingredientIndex != -1) {
+                    ingredientList.set(ingredientIndex, ingredient);
+                } else {
+                    ingredientList.add(ingredient);
+                }
+            } catch (SQLException e) {
+                onSQLException("Error while updating ingredient");
+            }
+        }
+
+        @FXML
+        void onDeleteIngredientButtonClicked(ActionEvent event) {
+            if (!ingredientTextField.getText().isBlank()) {
+                try {
+                    removeDBIngredient(recipeTitle, ingredient);
+
+                    List<Ingredient> ingredientList = recipes.get(recipesIndex).getIngredientList();
+                    ingredientList.remove(ingredient);
+
+                    deleteIngredientUI(this);
+                } catch (SQLException e) {
+                    onSQLException("Error while deleting ingredient");
+                }
             }
         }
     }
