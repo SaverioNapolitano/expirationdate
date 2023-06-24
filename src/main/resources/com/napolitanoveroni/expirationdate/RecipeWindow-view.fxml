@@ -20,6 +20,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
+
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="515.0" prefWidth="737.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.napolitanoveroni.expirationdate.RecipeWindowController">
    <top>
       <MenuBar BorderPane.alignment="CENTER">
@@ -43,13 +44,15 @@
       <Button mnemonicParsing="false" onAction="#onLeftButtonClicked" text="&lt;" BorderPane.alignment="CENTER">
          <BorderPane.margin>
             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-         </BorderPane.margin></Button>
+         </BorderPane.margin>
+      </Button>
    </left>
    <right>
       <Button mnemonicParsing="false" onAction="#onRightButtonClicked" text="&gt;" BorderPane.alignment="CENTER">
          <BorderPane.margin>
             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-         </BorderPane.margin></Button>
+         </BorderPane.margin>
+      </Button>
    </right>
    <center>
       <ScrollPane fitToWidth="true" prefHeight="556.0" prefWidth="619.0" BorderPane.alignment="CENTER">
@@ -67,14 +70,16 @@
                   <Separator>
                      <VBox.margin>
                         <Insets top="5.0" />
-                     </VBox.margin></Separator>
+                     </VBox.margin>
+                  </Separator>
                   <HBox alignment="CENTER">
                      <children>
                         <Label text="Duration:" />
                         <TextField fx:id="durationTextField" onAction="#onEnterDurationTextField" promptText="Type duration...">
                            <HBox.margin>
                               <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                           </HBox.margin></TextField>
+                           </HBox.margin>
+                        </TextField>
                         <ComboBox fx:id="unitComboBox" onAction="#onUnitComboBoxChosen" prefWidth="150.0" />
                      </children>
                   </HBox>
@@ -85,7 +90,8 @@
                         <TextField fx:id="portionsTextField" onAction="#onEnterPortionsTextField" promptText="Type portions...">
                            <HBox.margin>
                               <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                           </HBox.margin></TextField>
+                           </HBox.margin>
+                        </TextField>
                      </children>
                   </HBox>
                   <Separator />
@@ -95,7 +101,8 @@
                         <ComboBox fx:id="categoryComboBox" onAction="#onCategoryComboBoxChosen">
                            <HBox.margin>
                               <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                           </HBox.margin></ComboBox>
+                           </HBox.margin>
+                        </ComboBox>
                      </children>
                   </HBox>
                   <Separator />
@@ -121,7 +128,8 @@
                   <Separator>
                      <VBox.margin>
                         <Insets top="10.0" />
-                     </VBox.margin></Separator>
+                     </VBox.margin>
+                  </Separator>
                   <Label text="Ingredients" />
                   <HBox alignment="CENTER">
                      <children>

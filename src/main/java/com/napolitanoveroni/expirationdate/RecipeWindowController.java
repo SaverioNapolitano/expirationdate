@@ -15,6 +15,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
 import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -110,7 +111,6 @@ public class RecipeWindowController {
     }
 
     void setRecipe(Recipe recipe) {
-        // TODO disable every field until a valid title is typed
         titleTextField.setText(recipe.getTitle());
         durationTextField.setText(Double.toString(recipe.getDuration()));
         unitComboBox.setItems(FXCollections.observableArrayList("minutes", "hours"));
@@ -145,6 +145,21 @@ public class RecipeWindowController {
         }
 
         updateProgressIndicator(recipe);
+
+        if (recipe.getTitle().isBlank()) {
+            enableDisableRecipeFields(true);
+        }
+    }
+
+    void enableDisableRecipeFields(boolean disable) {
+        durationTextField.setDisable(disable);
+        unitComboBox.setDisable(disable);
+        portionsTextField.setDisable(disable);
+        categoryComboBox.setDisable(disable);
+        durationTextField.setDisable(disable);
+        stepsTextArea.setDisable(disable);
+        tagGridPane.setDisable(disable);
+        ingredientVBox.setDisable(disable);
     }
 
     void updateProgressIndicator(Recipe recipe) {
@@ -278,7 +293,8 @@ public class RecipeWindowController {
             if(recipes.size() == 0){
                 initializeCreationView();
             } else {
-                Recipe recipe = recipes.get(recipesIndex%recipes.size());
+                recipesIndex %= recipes.size();
+                Recipe recipe = recipes.get(recipesIndex);
                 setRecipe(recipe);
             }
         } catch (SQLException e) {
@@ -338,6 +354,7 @@ public class RecipeWindowController {
         String newTitle = titleTextField.getText();
         if (newTitle.isBlank()) {
             new Alert(Alert.AlertType.ERROR, "The title of the window can not be empty").show();
+            enableDisableRecipeFields(true);
             return;
         }
 
@@ -350,11 +367,18 @@ public class RecipeWindowController {
         try {
             if (!oldTitle.isBlank()) {
                 removeDBRecipe(oldTitle);
+            }
+
+            if (recipes.size() != 0) {
                 recipes.remove(recipesIndex);
             }
 
             insertDBRecipe(recipe);
             recipes.add(recipesIndex, recipe);
+
+            enableDisableRecipeFields(false);
+        } catch (SQLIntegrityConstraintViolationException ignored) {
+            // TODO intercept repeated titles
         } catch (SQLException e) {
             onSQLException("Error while inserting/editing recipe");
         }

@@ -39,7 +39,7 @@ public class Recipe {
         duration = 0;
         unit = durationUnit.MIN;
         portions = 0;
-        category = "";
+        category = "first course";
         steps = "";
         ingredientList = new ArrayList<>();
         tagList = new ArrayList<>();
