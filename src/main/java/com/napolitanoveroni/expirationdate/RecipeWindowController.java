@@ -110,6 +110,7 @@ public class RecipeWindowController {
     }
 
     void setRecipe(Recipe recipe) {
+        // TODO disable every field until a valid title is typed
         titleTextField.setText(recipe.getTitle());
         durationTextField.setText(Double.toString(recipe.getDuration()));
         unitComboBox.setItems(FXCollections.observableArrayList("minutes", "hours"));
@@ -241,22 +242,10 @@ public class RecipeWindowController {
     }
 
     void initializeCreationView() {
-        // TODO disable every field until a valid title is typed
         recipes.add(new Recipe());
         recipesIndex = recipes.size() - 1;
 
-        stepsTextArea.setText("");
-        portionsTextField.setText("");
-        durationTextField.setText("");
-        titleTextField.setText("");
-        categoryComboBox.getSelectionModel().select("first course");
-        unitComboBox.getSelectionModel().select("minutes");
-        ingredientsProgressIndicator.setProgress(0);
-        tagGridPane.getChildren().remove(0, lastTagGridIndex());
-        GridPane.setConstraints(tagGridPane.getChildren().get(lastTagGridIndex()), 0,0);
-
-        clearIngredientsVBox();
-        onAddIngredientButtonClicked(new ActionEvent());
+        setRecipe(recipes.get(recipesIndex));
     }
 
     void clearIngredientsVBox() {
@@ -365,7 +354,7 @@ public class RecipeWindowController {
             }
 
             insertDBRecipe(recipe);
-            recipes.add(recipe);
+            recipes.add(recipesIndex, recipe);
         } catch (SQLException e) {
             onSQLException("Error while inserting/editing recipe");
         }
