@@ -16,7 +16,9 @@ import javafx.scene.layout.VBox;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static com.napolitanoveroni.expirationdate.UtilsDB.*;
 
@@ -56,6 +58,15 @@ public class RecipeWindowController {
 
     private String categoryComboBoxSelected;
 
+    Set<String> notExpiredProducts;
+
+    public void setNotExpiredProducts(Set<String> notExpiredProducts) {
+        this.notExpiredProducts = notExpiredProducts;
+
+        updateProgressIndicator(recipes.get(recipesIndex));
+    }
+
+
     @FXML
     public void initialize() {
 
@@ -66,6 +77,8 @@ public class RecipeWindowController {
             recipes = FXCollections.observableArrayList();
             UtilsDB.onSQLException("Database Error: while loading data");
         }
+
+        notExpiredProducts = new HashSet<>();
 
         if (recipes.isEmpty()) {
             initializeCreationView();
@@ -88,7 +101,7 @@ public class RecipeWindowController {
             @Override
             public void handle(long now) {
                 if (now - lastUpdate >= 500_000_000 && !titleTextField.getText().isBlank()) {
-                    stepsTextAreaAutoSave();
+                    allFieldsAutoSave();
                     lastUpdate = now;
                 }
             }
@@ -129,6 +142,21 @@ public class RecipeWindowController {
         for (Ingredient ingredient : ingredientsCopy) {
             addIngredient(ingredient);
         }
+
+        updateProgressIndicator(recipe);
+    }
+
+    void updateProgressIndicator(Recipe recipe) {
+        List<Ingredient> ingredients = recipe.getIngredientList();
+        double count = 0;
+
+        for (Ingredient ingredient : ingredients) {
+            if (notExpiredProducts.contains(ingredient.getIngredient())) {
+                count++;
+            }
+        }
+
+        ingredientsProgressIndicator.setProgress(count / ingredients.size());
     }
 
     int lastTagGridIndex() {
@@ -151,16 +179,20 @@ public class RecipeWindowController {
         Recipe recipe = recipes.get(recipesIndex);
         String title = recipe.getTitle();
 
-        String lastTag = comboBox.getEditor().getText();
+        String newTag = comboBox.getEditor().getText();
 
         String oldTag;
         if (index < recipe.getTagList().size()) {
             oldTag = recipe.getTagList().get(index);
+
+            if (oldTag.equals(newTag)) {
+                return;
+            }
         } else {
-            oldTag = lastTag;
+            oldTag = newTag;
         }
 
-        if (lastTag.isBlank()) {
+        if (newTag.isBlank()) {
             for (int i = index; i < tagGridPane.getChildren().size() - 1; i++) {
                 int columnIndex = i % tagGridPane.getColumnCount();
                 int rowIndex = i / tagGridPane.getColumnCount();
@@ -197,12 +229,12 @@ public class RecipeWindowController {
             try {
                 removeDBTag(title, oldTag);
             } catch (SQLException ignored) {}
-            insertDBTag(title, lastTag);
+            insertDBTag(title, newTag);
 
             if (index < recipe.getTagList().size()) {
                 recipe.getTagList().remove(index);
             }
-            recipe.getTagList().add(index, lastTag);
+            recipe.getTagList().add(index, newTag);
         } catch (SQLException e) {
             onSQLException("Error while changing tags.");
         }
@@ -270,8 +302,19 @@ public class RecipeWindowController {
     @FXML
     void onEnterDurationTextField(ActionEvent ignoredEvent) {
         Recipe recipe = recipes.get(recipesIndex);
+
         try {
-            editDBRecipeDuration(recipe.getTitle(), recipe.getDuration());
+            double newDuration = Double.parseDouble(durationTextField.getText());
+
+            if (recipe.getDuration() == newDuration) {
+                return;
+            }
+
+            editDBRecipeDuration(recipe.getTitle(), newDuration);
+            recipe.setDuration(newDuration);
+        } catch (NumberFormatException e) {
+            new Alert(Alert.AlertType.ERROR, "What you typed wasn't a double number").show();
+            durationTextField.setText(Double.toString(recipe.getDuration()));
         } catch (SQLException e) {
             onSQLException("Error while updating duration.");
         }
@@ -281,8 +324,18 @@ public class RecipeWindowController {
     void onEnterPortionsTextField(ActionEvent ignoredEvent) {
         Recipe recipe = recipes.get(recipesIndex);
 
-        try{
-            editDBRecipePortion(recipe.getTitle(), recipe.getPortions());
+        try {
+            int newPortions = Integer.parseInt(portionsTextField.getText());
+
+            if (recipe.getPortions() == newPortions) {
+                return;
+            }
+
+            editDBRecipePortion(recipe.getTitle(), newPortions);
+            recipe.setPortions(newPortions);
+        } catch (NumberFormatException e) {
+            new Alert(Alert.AlertType.ERROR, "What you typed wasn't an integer number").show();
+            portionsTextField.setText(Integer.toString(recipe.getPortions()));
         } catch (SQLException e) {
             onSQLException("Error while updating portions.");
         }
@@ -295,7 +348,11 @@ public class RecipeWindowController {
 
         String newTitle = titleTextField.getText();
         if (newTitle.isBlank()) {
-            new Alert(Alert.AlertType.ERROR, "The title of the window can not be empty").showAndWait();
+            new Alert(Alert.AlertType.ERROR, "The title of the window can not be empty").show();
+            return;
+        }
+
+        if (oldTitle.equals(newTitle)) {
             return;
         }
 
@@ -347,7 +404,6 @@ public class RecipeWindowController {
     void onUnitComboBoxChosen(ActionEvent ignoredEvent) {
         unitComboBoxSelected = unitComboBox.getSelectionModel().getSelectedIndex();
 
-
         try {
             editDBRecipeUnit(recipes.get(recipesIndex).getTitle(), unitComboBoxSelected);
             recipes.get(recipesIndex).setUnit(switch (unitComboBoxSelected) {
@@ -359,7 +415,30 @@ public class RecipeWindowController {
             onSQLException("Error while updating unit");
         }
     }
-    void stepsTextAreaAutoSave(){
+    void allFieldsAutoSave(){
+        onEnterTitleTextField(new ActionEvent());
+        onEnterDurationTextField(new ActionEvent());
+        onEnterPortionsTextField(new ActionEvent());
+        saveStepsTextArea();
+        for (Node tag : tagGridPane.getChildren()) {
+            onEnterTagComboBox(new ActionEvent(tag, null));
+        }
+        for (Node hBoxNode : ingredientVBox.getChildren()) {
+            if (hBoxNode instanceof HBox hBox) {
+                for (Node node : hBox.getChildren()) {
+                    if (node instanceof TextField textField) {
+                        textField.getOnAction().handle(new ActionEvent());
+                    }
+                    if (node instanceof ComboBox<?> comboBox) {
+                        comboBox.getOnAction().handle(new ActionEvent());
+                    }
+                }
+            }
+        }
+        updateProgressIndicator(recipes.get(recipesIndex));
+    }
+
+    void saveStepsTextArea() {
         String steps = stepsTextArea.getText();
         Recipe recipe = recipes.get(recipesIndex);
         if(!steps.equals(recipe.getSteps())){
@@ -484,6 +563,10 @@ public class RecipeWindowController {
             String newIngredient = ingredientTextField.getText();
 
             if (!newIngredient.isBlank()) {
+                if (newIngredient.equals(ingredient.getIngredient())) {
+                    return;
+                }
+
                 List<Ingredient> ingredientList = recipes.get(recipesIndex).getIngredientList();
                 try {
                     try {
@@ -504,25 +587,42 @@ public class RecipeWindowController {
                     onSQLException("Error while inserting ingredient.");
                 }
             } else {
-                new Alert(Alert.AlertType.ERROR, "Ingredient field can't be empty").showAndWait();
-                ingredientTextField.setText(ingredient.getIngredient());
+                String oldValue = ingredient.getIngredient();
+                if (!oldValue.isBlank()) {
+                    new Alert(Alert.AlertType.ERROR, "Ingredient field can't be empty").show();
+                    ingredientTextField.setText(oldValue);
+                }
             }
         }
 
         void onEnterQuantityTextField(ActionEvent event) {
             String quantityString = quantityTextField.getText();
-            if (!quantityString.isBlank()) {
-                List<Ingredient> ingredientList = recipes.get(recipesIndex).getIngredientList();
-                int ingredientIndex = ingredientList.indexOf(ingredient);
-                ingredient.setQuantity(Double.parseDouble(quantityString));
 
-                updateIngredient(ingredientIndex, ingredientList);
+            if (!quantityString.isBlank()) {
+                try {
+                    double newQuantity = Double.parseDouble(quantityString);
+                    if (newQuantity == ingredient.getQuantity()) {
+                        return;
+                    }
+                    List<Ingredient> ingredientList = recipes.get(recipesIndex).getIngredientList();
+                    int ingredientIndex = ingredientList.indexOf(ingredient);
+                    ingredient.setQuantity(newQuantity);
+
+                    updateIngredient(ingredientIndex, ingredientList);
+                } catch (NumberFormatException e) {
+                    new Alert(Alert.AlertType.ERROR,"Error, the quantity typed is not a decimal number").show();
+                    quantityTextField.setText(Double.toString(ingredient.getQuantity()));
+                }
+
             }
         }
 
         void onEnterUnitComboBox(ActionEvent event) {
             String unit = unitComboBox.getEditor().getText();
             if (!unit.isBlank()) {
+                if (unit.equals(ingredient.getUnit_of_measurement())) {
+                    return;
+                }
                 List<Ingredient> ingredientList = recipes.get(recipesIndex).getIngredientList();
                 int ingredientIndex = ingredientList.indexOf(ingredient);
                 ingredient.setUnit_of_measurement(unit);

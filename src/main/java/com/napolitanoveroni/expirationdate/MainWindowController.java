@@ -19,6 +19,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.TextField;
@@ -28,6 +29,7 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
+import javafx.stage.Stage;
 
 import java.awt.*;
 import java.io.File;
@@ -35,10 +37,8 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.time.LocalDate;
-import java.util.Comparator;
-import java.util.ListIterator;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.napolitanoveroni.expirationdate.UtilsDB.*;
 
@@ -229,7 +229,7 @@ public class MainWindowController {
             // Create the dialog
             Dialog<ButtonType> dialog = new Dialog<>();
             dialog.setTitle("Edit Product");
-            dialog.initModality(Modality.WINDOW_MODAL);
+            dialog.initModality(Modality.APPLICATION_MODAL);
             dialog.setDialogPane(view);
 
             // Show the dialog and wait until the user closes it
@@ -347,8 +347,29 @@ public class MainWindowController {
     }
 
     @FXML
-    void onRecipesExpirationListButtonClicked(ActionEvent ignoredEvent) {
-        // TODO database connection with recipes
+    void onRecipesExpirationListButtonClicked(ActionEvent ignoredEvent) throws IOException {
+
+        Stage stage = new Stage();
+        FXMLLoader fxmlLoader = new FXMLLoader(ExpirationDateApplication.class.getResource("RecipeWindow-view.fxml"));
+
+        Scene scene = new Scene(fxmlLoader.load());
+
+        RecipeWindowController controller = fxmlLoader.getController();
+
+        controller.setNotExpiredProducts(
+                expirationList.stream()
+                        .filter(product -> product.getExpirationDate().isAfter(LocalDate.now()))
+                        .map(Product::getProductName)
+                        .collect(Collectors.toSet())
+        );
+
+        stage.setTitle("Recipe");
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.setScene(scene);
+
+
+
+        stage.show();
     }
 
     /*

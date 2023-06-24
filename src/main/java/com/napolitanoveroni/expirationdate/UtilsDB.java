@@ -21,7 +21,7 @@ public class UtilsDB {
     }
 
     public static void onSQLException(String message) {
-        new Alert(Alert.AlertType.ERROR, message).showAndWait();
+        new Alert(Alert.AlertType.ERROR, message).show();
     }
 
     static void dbConnection() throws SQLException {
