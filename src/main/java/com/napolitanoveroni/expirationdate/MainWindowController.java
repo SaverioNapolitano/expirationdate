@@ -288,7 +288,7 @@ public class MainWindowController {
         Product oldProduct = event.getRowValue();
         Product editedProduct = actionOnProduct(oldProduct);
 
-        if (!editedProduct.getProductName().equals("")) {
+        if (!editedProduct.getProductName().equals("") && !editedProduct.equals(oldProduct)) {
             try {
                 editCalendarEvent(oldProduct, editedProduct);
                 editDBProductAllField(oldProduct, editedProduct, this);
