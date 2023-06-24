@@ -1,5 +1,8 @@
 package com.napolitanoveroni.expirationdate;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import javafx.animation.AnimationTimer;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -13,13 +16,13 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 
+import java.io.File;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static com.napolitanoveroni.expirationdate.UtilsDB.*;
 
@@ -385,13 +388,57 @@ public class RecipeWindowController {
     }
 
     @FXML
-    void onExportMenuItemClicked(ActionEvent event) {
-        //TODO see JSON
+    void onExportMenuItemClicked(ActionEvent ignoredEvent) {
+        try {
+            FileChooser fileChooser = new FileChooser();
+            FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("JSON files (*.json)", "*.json");
+            fileChooser.getExtensionFilters().add(extFilter);
+
+            File file = fileChooser.showSaveDialog(null);
+            if (file != null) {
+                ObjectMapper mapper = new ObjectMapper();
+                mapper.registerModule(new JavaTimeModule());
+                mapper.writerWithDefaultPrettyPrinter().writeValue(file, recipes);
+            }
+        } catch (IOException e) {
+            new Alert(Alert.AlertType.ERROR, "Could not save data").showAndWait();
+        }
     }
 
     @FXML
-    void onImportMenuItemClicked(ActionEvent event) {
-        //TODO see JSON
+    void onImportMenuItemClicked(ActionEvent ignoredEvent) {
+        try {
+            FileChooser fileChooser = new FileChooser();
+            FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("JSON files (*.json)", "*.json");
+            fileChooser.getExtensionFilters().add(extFilter);
+
+            File file = fileChooser.showOpenDialog(null);
+            if (file != null) {
+                ObjectMapper mapper = new ObjectMapper();
+                mapper.registerModule(new JavaTimeModule());
+                List<Recipe> recipeList = mapper.readValue(file, new TypeReference<>() {
+                });
+                for (ListIterator<Recipe> recipeListIterator = recipeList.listIterator(); recipeListIterator.hasNext();) {
+                    Recipe recipe = recipeListIterator.next();
+                    try {
+                        insertDBRecipe(recipe);
+                    } catch (SQLIntegrityConstraintViolationException e){
+                        recipeListIterator.remove();
+                    }
+                }
+                recipes.addAll(recipeList);
+                if(recipes.get(recipesIndex).getTitle().isBlank()){
+                    recipes.remove(recipesIndex);
+                    recipesIndex%=recipes.size();
+                    setRecipe(recipes.get(recipesIndex));
+                }
+                enableDisableRecipeFields(false);
+            }
+        } catch (IOException e) {
+            new Alert(Alert.AlertType.ERROR, "Could not load data").showAndWait();
+        } catch (SQLException e) {
+            onSQLException("Error while inserting recipes in the database.");
+        }
     }
 
     @FXML

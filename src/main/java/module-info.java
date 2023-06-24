@@ -7,6 +7,9 @@ module com.napolitanoveroni.expirationdate {
     requires java.sql;
     requires net.sf.biweekly;
     requires java.desktop;
+    requires com.fasterxml.jackson.core;
+    requires com.fasterxml.jackson.databind;
+    requires com.fasterxml.jackson.datatype.jsr310;
 
     opens com.napolitanoveroni.expirationdate to javafx.fxml;
     exports com.napolitanoveroni.expirationdate;
