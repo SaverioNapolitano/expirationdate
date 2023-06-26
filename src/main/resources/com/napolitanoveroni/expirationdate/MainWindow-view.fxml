@@ -7,6 +7,8 @@
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
@@ -34,9 +36,30 @@
                         <Insets left="10.0" />
                      </BorderPane.margin>
                      <children>
-                        <Button mnemonicParsing="false" onAction="#onNewExpirationListButtonClicked" text="New" />
-                        <Button mnemonicParsing="false" onAction="#onDeleteExpirationListButtonClicked" text="Delete" />
-                      <Button mnemonicParsing="false" onAction="#onRecipesExpirationListButtonClicked" text="Recipes" />
+                        <Button mnemonicParsing="false" onAction="#onNewExpirationListButtonClicked">
+                           <graphic>
+                              <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@images/new-icon.png" />
+                                 </image>
+                              </ImageView>
+                           </graphic></Button>
+                        <Button mnemonicParsing="false" onAction="#onDeleteExpirationListButtonClicked">
+                           <graphic>
+                              <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@images/delete-icon.png" />
+                                 </image>
+                              </ImageView>
+                           </graphic></Button>
+                      <Button mnemonicParsing="false" onAction="#onRecipesExpirationListButtonClicked">
+                           <graphic>
+                              <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@images/cooking-book-icon.png" />
+                                 </image>
+                              </ImageView>
+                           </graphic></Button>
                      </children>
                   </HBox>
                </bottom>
@@ -57,7 +80,14 @@
                   </ScrollPane>
                </center>
                <bottom>
-                  <Button mnemonicParsing="false" onAction="#onClearButtonClicked" text="Clear" BorderPane.alignment="CENTER" />
+                  <Button mnemonicParsing="false" onAction="#onClearButtonClicked" BorderPane.alignment="CENTER">
+                     <graphic>
+                        <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@images/clear-icon.png" />
+                           </image>
+                        </ImageView>
+                     </graphic></Button>
                </bottom>
             </BorderPane>
          </items>

@@ -26,6 +26,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
@@ -38,8 +39,8 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.time.LocalDate;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.napolitanoveroni.expirationdate.UtilsDB.*;
@@ -427,7 +428,11 @@ public class MainWindowController {
             GridPane.setMargin(productTextField, new Insets(0, 10, 0, 10));
             productTextField.setOnAction(this::onEnterShoppingTextField);
 
-            deleteButton = new Button("Delete");    // TODO add graphic
+            deleteButton = new Button("");
+            ImageView imageView = new ImageView("com/napolitanoveroni/expirationdate/images/delete-icon-shoppingList.png");
+            imageView.setFitWidth(25);
+            imageView.setPreserveRatio(true);
+            deleteButton.setGraphic(imageView);
             deleteButton.setOnAction(this::onDeleteShoppingListButtonClicked);
 
             container = new GridPane();
