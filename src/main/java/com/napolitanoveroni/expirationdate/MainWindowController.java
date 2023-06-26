@@ -54,9 +54,6 @@ public class MainWindowController {
     @FXML
     private TableView<Product> expirationListTableView;
 
-    @FXML
-    private GridPane shoppingListGridPane;
-
     ObservableList<Product> expirationList;
 
     @FXML
@@ -89,6 +86,8 @@ public class MainWindowController {
         editableCols();
 
         sortTableView(expirationListTableView);
+
+        new ShoppingListItemUI();
     }
 
     private void editableCols() {
@@ -385,75 +384,6 @@ public class MainWindowController {
      */
 
     @FXML
-    void onEnterShoppingTextField(ActionEvent event) {  // TODO the new item is placed before the checked items
-        CheckBox newCheckBox = new CheckBox();
-        newCheckBox.setOnAction(this::onCheckBoxChecked);
-        TextField newTextField = new TextField();
-        GridPane.setMargin(newTextField, new Insets(0, 10, 0, 10));
-        newTextField.setOnAction(this::onEnterShoppingTextField);
-
-        Button newButton = new Button("Delete");    // TODO add graphic
-        newButton.setOnAction(this::onDeleteShoppingListButtonClicked);
-
-        shoppingListGridPane.addRow(shoppingListGridPane.getRowCount(), newCheckBox, newTextField, newButton);
-        GridPane newGridPane = new GridPane();
-        newGridPane.setPadding(new Insets(10, 10, 0, 10));
-        newGridPane.setAlignment(Pos.TOP_CENTER);
-
-        shoppingListVBox.getChildren().add(newGridPane);
-        newGridPane.addRow(newGridPane.getRowCount(), newCheckBox, newTextField, newButton);
-        newTextField.requestFocus(); //TODO resize newGridPane
-    }
-
-    @FXML
-    void onDeleteShoppingListButtonClicked(ActionEvent event) {
-        if (event.getSource() instanceof Button deleteButton) {
-            shoppingListVBox.getChildren().remove(deleteButton.getParent());
-        }
-        if (shoppingListVBox.getChildren().size() == 0) {
-            onEnterShoppingTextField(event);
-        }
-    }
-
-    @FXML
-    void onCheckBoxChecked(ActionEvent event) {
-        if (event.getSource() instanceof CheckBox checkBox) {
-            int index = shoppingListVBox.getChildren().indexOf(checkBox.getParent());
-            if (!checkBox.isSelected() && !checkBox.isIndeterminate()) { //unchecked
-                shoppingListVBox.getChildren().get(index).toBack();
-            }
-            if (checkBox.isSelected() && !checkBox.isIndeterminate()) { //checked
-                shoppingListVBox.getChildren().get(index).toFront();
-                index = shoppingListVBox.getChildren().size() - 1;
-
-                String productName = "";
-
-                if (shoppingListVBox.getChildren().get(index) instanceof GridPane indexthGridPane) {
-                    if (indexthGridPane.getChildren().get(1) instanceof TextField textField) {
-                        productName = textField.getText();
-                    }
-                }
-
-                try {
-                    Product edited = actionOnProduct(new Product(productName));
-                    if (!cancelEditProduct && !edited.getProductName().equals("")) {
-                        insertDBProduct(edited);
-                        addCalendarEvent(edited);
-                        expirationList.add(edited);
-                    } else {
-                        checkBox.setSelected(false);
-                        cancelEditProduct = false;
-                    }
-                } catch (SQLException e) {
-                    new Alert(Alert.AlertType.ERROR, "Database Error: while adding item").showAndWait();
-                }
-            }
-        }
-
-        sortTableView(expirationListTableView);
-    }
-
-    @FXML
     void onClearButtonClicked(ActionEvent ignoredEvent) {
         ObservableList<Node> children = shoppingListVBox.getChildren();
         for (ListIterator<Node> nodeListIterator = children.listIterator(); nodeListIterator.hasNext(); ) {
@@ -467,7 +397,88 @@ public class MainWindowController {
             }
         }
         if (children.isEmpty()) {
-            onEnterShoppingTextField(ignoredEvent);
+            new ShoppingListItemUI();
+        }
+    }
+
+    private class ShoppingListItemUI {
+        GridPane container;
+        CheckBox productCheckBox;
+        TextField productTextField;
+        Button deleteButton;
+
+        public ShoppingListItemUI() {
+            productCheckBox = new CheckBox();
+            productCheckBox.setOnAction(this::onCheckBoxChecked);
+
+            productTextField = new TextField();
+            GridPane.setMargin(productTextField, new Insets(0, 10, 0, 10));
+            productTextField.setOnAction(this::onEnterShoppingTextField);
+
+            deleteButton = new Button("Delete");    // TODO add graphic
+            deleteButton.setOnAction(this::onDeleteShoppingListButtonClicked);
+
+            container = new GridPane();
+            container.setPadding(new Insets(10, 10, 0, 10));
+            container.setAlignment(Pos.TOP_CENTER);
+
+            shoppingListVBox.getChildren().add(container);
+            container.addRow(container.getRowCount(), productCheckBox, productTextField, deleteButton);
+
+            productTextField.requestFocus();
+        }
+
+        @FXML
+        void onCheckBoxChecked(ActionEvent event) {
+            if (event.getSource() instanceof CheckBox checkBox) {
+                int index = shoppingListVBox.getChildren().indexOf(checkBox.getParent());
+                if (!checkBox.isSelected() && !checkBox.isIndeterminate()) { //unchecked
+                    shoppingListVBox.getChildren().get(index).toBack();
+                }
+                if (checkBox.isSelected() && !checkBox.isIndeterminate()) { //checked
+                    shoppingListVBox.getChildren().get(index).toFront();
+                    index = shoppingListVBox.getChildren().size() - 1;
+
+                    String productName = "";
+
+                    if (shoppingListVBox.getChildren().get(index) instanceof GridPane indexthGridPane) {
+                        if (indexthGridPane.getChildren().get(1) instanceof TextField textField) {
+                            productName = textField.getText();
+                        }
+                    }
+
+                    try {
+                        Product edited = actionOnProduct(new Product(productName));
+                        if (!cancelEditProduct && !edited.getProductName().equals("")) {
+                            insertDBProduct(edited);
+                            addCalendarEvent(edited);
+                            expirationList.add(edited);
+                        } else {
+                            checkBox.setSelected(false);
+                            cancelEditProduct = false;
+                        }
+                    } catch (SQLException e) {
+                        new Alert(Alert.AlertType.ERROR, "Database Error: while adding item").showAndWait();
+                    }
+                }
+            }
+
+            sortTableView(expirationListTableView);
+        }
+
+        @FXML
+        void onEnterShoppingTextField(ActionEvent event) {  // TODO the new item is placed before the checked items
+            new ShoppingListItemUI();
+        }
+
+        @FXML
+        void onDeleteShoppingListButtonClicked(ActionEvent event) {
+            if (event.getSource() instanceof Button button) {
+                shoppingListVBox.getChildren().remove(button.getParent());
+            }
+            if (shoppingListVBox.getChildren().size() == 0) {
+                onEnterShoppingTextField(event);
+            }
         }
     }
 }
