@@ -385,8 +385,6 @@ public class MainWindowController {
                 controller::onWindowCloseRequest);
 
         stage.show();
-
-
     }
 
     /*
