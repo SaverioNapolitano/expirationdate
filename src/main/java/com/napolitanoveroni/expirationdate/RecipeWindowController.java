@@ -57,6 +57,18 @@ public class RecipeWindowController {
     @FXML
     private ComboBox<String> unitComboBox;
 
+    @FXML
+    private Button leftButton;
+
+    @FXML
+    private Button rightButton;
+
+    @FXML
+    private MenuItem addMenuitem;
+
+    @FXML
+    private Menu fileMenu;
+
     private ObservableList<Recipe> recipes;
     int recipesIndex;
 
@@ -156,11 +168,11 @@ public class RecipeWindowController {
         updateProgressIndicator(recipe);
 
         if (recipe.getTitle().isBlank()) {
-            enableDisableRecipeFields(true);
+            disableRecipeFields(true);
         }
     }
 
-    void enableDisableRecipeFields(boolean disable) {
+    void disableRecipeFields(boolean disable) {
         durationTextField.setDisable(disable);
         unitComboBox.setDisable(disable);
         portionsTextField.setDisable(disable);
@@ -169,6 +181,10 @@ public class RecipeWindowController {
         stepsTextArea.setDisable(disable);
         tagGridPane.setDisable(disable);
         ingredientVBox.setDisable(disable);
+        leftButton.setDisable(disable);
+        rightButton.setDisable(disable);
+        fileMenu.setDisable(disable);
+        addMenuitem.setDisable(disable);
     }
 
     void updateProgressIndicator(Recipe recipe) {
@@ -305,12 +321,15 @@ public class RecipeWindowController {
                 recipesIndex %= recipes.size();
                 Recipe recipe = recipes.get(recipesIndex);
                 setRecipe(recipe);
+
+                if (suspendAutoSave) {
+                    suspendAutoSave = false;
+                    disableRecipeFields(false);
+                }
             }
         } catch (SQLException e) {
             onSQLException("Error while removing recipe.");
         }
-
-
     }
 
     @FXML
@@ -363,7 +382,7 @@ public class RecipeWindowController {
         String newTitle = titleTextField.getText();
         if (newTitle.isBlank()) {
             new Alert(Alert.AlertType.ERROR, "The title of the window can not be empty").show();
-            enableDisableRecipeFields(true);
+            disableRecipeFields(true);
             return;
         }
 
@@ -373,6 +392,7 @@ public class RecipeWindowController {
 
         if(recipes.stream().map(Recipe::getTitle).toList().contains(newTitle)){
             suspendAutoSave = true;
+            disableRecipeFields(true);
             return;
         }
 
@@ -389,9 +409,7 @@ public class RecipeWindowController {
             insertDBRecipe(recipe);
             recipes.add(recipesIndex, recipe);
 
-            enableDisableRecipeFields(false);
-        } catch (SQLIntegrityConstraintViolationException ignored) {
-            // TODO intercept repeated titles
+            disableRecipeFields(false);
         } catch (SQLException e) {
             onSQLException("Error while inserting/editing recipe");
         }
@@ -442,7 +460,7 @@ public class RecipeWindowController {
                     recipesIndex%=recipes.size();
                     setRecipe(recipes.get(recipesIndex));
                 }
-                enableDisableRecipeFields(false);
+                disableRecipeFields(false);
             }
         } catch (IOException e) {
             new Alert(Alert.AlertType.ERROR, "Could not load data").showAndWait();
@@ -745,7 +763,7 @@ public class RecipeWindowController {
             alert.getButtonTypes().add(ButtonType.CANCEL);
             alert.getButtonTypes().add(ButtonType.YES);
             alert.setTitle("Quit application");
-            alert.setContentText("Close without saving?");
+            alert.setContentText("The current recipe already exists: do you want to cancel it and close?");
             alert.initOwner((Window) event.getSource());
             Optional<ButtonType> res = alert.showAndWait();
 

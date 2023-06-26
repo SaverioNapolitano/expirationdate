@@ -20,12 +20,11 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="515.0" prefWidth="737.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.napolitanoveroni.expirationdate.RecipeWindowController">
    <top>
       <MenuBar BorderPane.alignment="CENTER">
         <menus>
-          <Menu mnemonicParsing="false" text="File">
+          <Menu fx:id="fileMenu" mnemonicParsing="false" text="File">
             <items>
               <MenuItem mnemonicParsing="false" onAction="#onImportMenuItemClicked" text="Import..." />
                   <MenuItem mnemonicParsing="false" onAction="#onExportMenuItemClicked" text="Export..." />
@@ -33,7 +32,7 @@
           </Menu>
           <Menu mnemonicParsing="false" text="Edit">
             <items>
-              <MenuItem mnemonicParsing="false" onAction="#onAddMenuItemClicked" text="Add" />
+              <MenuItem fx:id="addMenuitem" mnemonicParsing="false" onAction="#onAddMenuItemClicked" text="Add" />
                   <MenuItem mnemonicParsing="false" onAction="#onDeleteMenuItemClicked" text="Delete" />
             </items>
           </Menu>
@@ -41,14 +40,14 @@
       </MenuBar>
    </top>
    <left>
-      <Button mnemonicParsing="false" onAction="#onLeftButtonClicked" text="&lt;" BorderPane.alignment="CENTER">
+      <Button fx:id="leftButton" mnemonicParsing="false" onAction="#onLeftButtonClicked" text="&lt;" BorderPane.alignment="CENTER">
          <BorderPane.margin>
             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
          </BorderPane.margin>
       </Button>
    </left>
    <right>
-      <Button mnemonicParsing="false" onAction="#onRightButtonClicked" text="&gt;" BorderPane.alignment="CENTER">
+      <Button fx:id="rightButton" mnemonicParsing="false" onAction="#onRightButtonClicked" text="&gt;" BorderPane.alignment="CENTER">
          <BorderPane.margin>
             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
          </BorderPane.margin>
