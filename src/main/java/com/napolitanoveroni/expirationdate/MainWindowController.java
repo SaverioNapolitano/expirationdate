@@ -30,6 +30,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 import java.awt.*;
 import java.io.File;
@@ -367,9 +368,12 @@ public class MainWindowController {
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.setScene(scene);
 
-
+        scene.getWindow().addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST,
+                controller::onWindowCloseRequest);
 
         stage.show();
+
+
     }
 
     /*

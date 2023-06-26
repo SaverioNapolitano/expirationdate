@@ -17,6 +17,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
+import javafx.stage.Window;
+import javafx.stage.WindowEvent;
 
 import java.io.File;
 import java.io.IOException;
@@ -62,6 +64,8 @@ public class RecipeWindowController {
 
     private String categoryComboBoxSelected;
 
+    private boolean suspendAutoSave;
+
     Set<String> notExpiredProducts;
 
     public void setNotExpiredProducts(Set<String> notExpiredProducts) {
@@ -94,6 +98,8 @@ public class RecipeWindowController {
 
         categoryComboBox.setItems(FXCollections.observableArrayList("first course", "second course", "dessert", "side dish"));
 
+        suspendAutoSave = false;
+
         initializeTimer();
     }
 
@@ -104,7 +110,7 @@ public class RecipeWindowController {
 
             @Override
             public void handle(long now) {
-                if (now - lastUpdate >= 500_000_000 && !titleTextField.getText().isBlank()) {
+                if (now - lastUpdate >= 500_000_000) {
                     allFieldsAutoSave();
                     lastUpdate = now;
                 }
@@ -365,14 +371,18 @@ public class RecipeWindowController {
             return;
         }
 
+        if(recipes.stream().map(Recipe::getTitle).toList().contains(newTitle)){
+            suspendAutoSave = true;
+            return;
+        }
+
+        suspendAutoSave = false;
+
         recipe.setTitle(newTitle);
 
         try {
-            if (!oldTitle.isBlank()) {
-                removeDBRecipe(oldTitle);
-            }
-
             if (recipes.size() != 0) {
+                removeDBRecipe(oldTitle);
                 recipes.remove(recipesIndex);
             }
 
@@ -476,7 +486,13 @@ public class RecipeWindowController {
         }
     }
     void allFieldsAutoSave(){
+        if(titleTextField.getText().isBlank()){
+            return;
+        }
         onEnterTitleTextField(new ActionEvent());
+        if(suspendAutoSave){
+            return;
+        }
         onEnterDurationTextField(new ActionEvent());
         onEnterPortionsTextField(new ActionEvent());
         saveStepsTextArea();
@@ -717,6 +733,34 @@ public class RecipeWindowController {
                     deleteIngredientUI(this);
                 } catch (SQLException e) {
                     onSQLException("Error while deleting ingredient");
+                }
+            }
+        }
+    }
+
+    public void onWindowCloseRequest(WindowEvent event){
+        if(suspendAutoSave){
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.getButtonTypes().remove(ButtonType.OK);
+            alert.getButtonTypes().add(ButtonType.CANCEL);
+            alert.getButtonTypes().add(ButtonType.YES);
+            alert.setTitle("Quit application");
+            alert.setContentText("Close without saving?");
+            alert.initOwner((Window) event.getSource());
+            Optional<ButtonType> res = alert.showAndWait();
+
+            if(res.isPresent()) {
+                if(res.get().equals(ButtonType.CANCEL)) {
+                    event.consume();
+                } else {
+                     try {
+                         String oldTitle = recipes.get(recipesIndex).getTitle();
+                        removeDBRecipe(oldTitle);
+                        recipes.remove(recipesIndex);
+                    } catch (SQLException e) {
+                        onSQLException("Error while removing recipe.");
+                    }
+
                 }
             }
         }

@@ -17,15 +17,6 @@ public class ExpirationDateApplication extends Application {
         stage.show();
     }
 
-    /*@Override
-    public void start(Stage stage) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(ExpirationDateApplication.class.getResource("RecipeWindow-view.fxml"));
-        Scene scene = new Scene(fxmlLoader.load());
-        stage.setTitle("Recipe");
-        stage.setScene(scene);
-        stage.show();
-    }*/
-
     public static void main(String[] args) {
         launch();
     }
