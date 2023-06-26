@@ -39,6 +39,7 @@ import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.napolitanoveroni.expirationdate.UtilsDB.*;
@@ -254,6 +255,19 @@ public class MainWindowController {
         FXCollections.sort(expirationListTableView.getItems(), Comparator.comparing(Product::getExpirationDate));
     }
 
+    boolean containsBlankItem() {
+        List<Boolean> textFieldsStatus = shoppingListVBox.getChildren().stream().map(node -> {
+            if (node instanceof GridPane gridPane) {
+                if (gridPane.getChildren().get(1) instanceof TextField textField)  {
+                    return textField.getText().isBlank();
+                }
+            }
+            return false;
+        }).toList();
+
+        return textFieldsStatus.contains(true);
+    }
+
     /*
 
 
@@ -422,7 +436,21 @@ public class MainWindowController {
             container.setPadding(new Insets(10, 10, 0, 10));
             container.setAlignment(Pos.TOP_CENTER);
 
-            shoppingListVBox.getChildren().add(container);
+            List<Boolean> checkBoxesStatus = shoppingListVBox.getChildren().stream().map(node -> {
+                if (node instanceof GridPane gridPane) {
+                    if (gridPane.getChildren().get(0) instanceof CheckBox checkBox)  {
+                        return checkBox.isSelected() && !checkBox.isIndeterminate();
+                    }
+                }
+                return false;
+            }).toList();
+
+            int insertIndex = checkBoxesStatus.indexOf(true);
+            if (insertIndex == -1) {
+                insertIndex = shoppingListVBox.getChildren().size();
+            }
+
+            shoppingListVBox.getChildren().add(insertIndex, container);
             container.addRow(container.getRowCount(), productCheckBox, productTextField, deleteButton);
 
             productTextField.requestFocus();
@@ -441,9 +469,16 @@ public class MainWindowController {
 
                     String productName = "";
 
+                    TextField productTextField = new TextField();
+
                     if (shoppingListVBox.getChildren().get(index) instanceof GridPane indexthGridPane) {
                         if (indexthGridPane.getChildren().get(1) instanceof TextField textField) {
                             productName = textField.getText();
+                            productTextField = textField;
+                            productTextField.setDisable(true);
+                            if (shoppingListVBox.getChildren().size() == 1) {
+                                new ShoppingListItemUI();
+                            }
                         }
                     }
 
@@ -456,7 +491,9 @@ public class MainWindowController {
                         } else {
                             checkBox.setSelected(false);
                             cancelEditProduct = false;
+                            productTextField.setDisable(false);
                         }
+
                     } catch (SQLException e) {
                         new Alert(Alert.AlertType.ERROR, "Database Error: while adding item").showAndWait();
                     }
@@ -467,8 +504,10 @@ public class MainWindowController {
         }
 
         @FXML
-        void onEnterShoppingTextField(ActionEvent event) {  // TODO the new item is placed before the checked items
-            new ShoppingListItemUI();
+        void onEnterShoppingTextField(ActionEvent event) {
+            if (!containsBlankItem()) {
+                new ShoppingListItemUI();
+            }
         }
 
         @FXML
@@ -476,7 +515,7 @@ public class MainWindowController {
             if (event.getSource() instanceof Button button) {
                 shoppingListVBox.getChildren().remove(button.getParent());
             }
-            if (shoppingListVBox.getChildren().size() == 0) {
+            if (shoppingListVBox.getChildren().size() == 0 || !containsBlankItem()) {
                 onEnterShoppingTextField(event);
             }
         }
