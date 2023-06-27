@@ -80,6 +80,8 @@ public class RecipeWindowController {
 
     Set<String> notExpiredProducts;
 
+//    Set<String> existingTags;
+
     public void setNotExpiredProducts(Set<String> notExpiredProducts) {
         this.notExpiredProducts = notExpiredProducts;
 
@@ -93,6 +95,7 @@ public class RecipeWindowController {
         try {
             dbConnection();
             recipes = getRecipeData();
+//            existingTags = getAllTags();
         } catch (SQLException e) {
             recipes = FXCollections.observableArrayList();
             AlertDialog.alertError("Database Error: while loading data");
@@ -217,6 +220,10 @@ public class RecipeWindowController {
         ComboBox<String> comboBox = (ComboBox<String>)event.getSource();
         int index = tagGridPane.getChildren().indexOf(comboBox);
 
+        /*if (index == -1) {
+            return;
+        }*/
+
         Recipe recipe = recipes.get(recipesIndex);
         String title = recipe.getTitle();
 
@@ -256,27 +263,54 @@ public class RecipeWindowController {
         if (!((ComboBox<String>)(tagGridPane.getChildren().get(tagGridPane.getChildren().size() - 1))).getEditor().getText().isBlank()) {
             int lastIndex = tagGridPane.getChildren().size();
             ComboBox<String> newComboBoxTag = new ComboBox<>();
+//            newComboBoxTag.setItems(FXCollections.observableArrayList(existingTags));
             newComboBoxTag.setEditable(true);
             newComboBoxTag.getEditor().setPromptText("Add tag...");
-            newComboBoxTag.setOnAction(this::onEnterTagComboBox);
 
             int columnIndex = lastIndex % tagGridPane.getColumnCount();
             int rowIndex = lastIndex / tagGridPane.getColumnCount();
 
             tagGridPane.add(newComboBoxTag, columnIndex, rowIndex);
+            newComboBoxTag.setOnAction(this::onEnterTagComboBox);
+            GridPane.setMargin(newComboBoxTag, new Insets(0,5,0,5));
         }
+
+        /*List<String> tagList = recipes.get(recipesIndex).getTagList();
+
+        if (tagList.contains(newTag)) {
+            suspendAutoSave = true;
+            disableRecipeFields(true);
+            titleTextField.setDisable(true);
+            tagGridPane.setDisable(false);
+            tagGridPane.getChildren().forEach(node -> node.setDisable(true));
+            tagGridPane.getChildren().get(index).setDisable(false);
+            return;
+        } else {
+            suspendAutoSave = false;
+            disableRecipeFields(false);
+            titleTextField.setDisable(false);
+            tagGridPane.getChildren().forEach(node -> node.setDisable(false));
+        }*/
 
         try {
             try {
                 removeDBTag(title, oldTag);
+                if (index < recipe.getTagList().size()) {
+                    recipe.getTagList().remove(index);
+                }
             } catch (SQLException ignored) {}
-            insertDBTag(title, newTag);
 
-            if (index < recipe.getTagList().size()) {
-                recipe.getTagList().remove(index);
-            }
+            insertDBTag(title, newTag);
             recipe.getTagList().add(index, newTag);
-        } catch (SQLException e) {
+
+            /*existingTags.add(newTag);
+            tagGridPane.getChildren().forEach(
+                node -> {
+                    ComboBox<String> comboBox1 = (ComboBox<String>) node;
+                    comboBox1.setItems(FXCollections.observableArrayList(existingTags));
+                });*/
+        }
+        catch (SQLException e) {
             AlertDialog.alertError("Error while changing tags.");
         }
     }
@@ -513,21 +547,32 @@ public class RecipeWindowController {
             return;
         }
         onEnterTitleTextField(new ActionEvent());
-        if(suspendAutoSave){
-            return;
-        }
-        onEnterDurationTextField(new ActionEvent());
-        onEnterPortionsTextField(new ActionEvent());
-        saveStepsTextArea();
+
         for (Node tag : tagGridPane.getChildren()) {
             onEnterTagComboBox(new ActionEvent(tag, null));
         }
+
         for (Node hBoxNode : ingredientVBox.getChildren()) {
             if (hBoxNode instanceof HBox hBox) {
                 for (Node node : hBox.getChildren()) {
                     if (node instanceof TextField textField) {
                         textField.getOnAction().handle(new ActionEvent());
                     }
+                }
+            }
+        }
+
+        if(suspendAutoSave){
+            return;
+        }
+
+        onEnterDurationTextField(new ActionEvent());
+        onEnterPortionsTextField(new ActionEvent());
+        saveStepsTextArea();
+
+        for (Node hBoxNode : ingredientVBox.getChildren()) {
+            if (hBoxNode instanceof HBox hBox) {
+                for (Node node : hBox.getChildren()) {
                     if (node instanceof ComboBox<?> comboBox) {
                         comboBox.getOnAction().handle(new ActionEvent());
                     }
@@ -679,6 +724,10 @@ public class RecipeWindowController {
                     insertDBIngredient(recipeTitle, ingredient);
                     ingredientList.add(ingredient);
 
+                    suspendAutoSave = false;
+                    disableRecipeFields(false);
+                    titleTextField.setDisable(false);
+                    ingredientVBox.getChildren().forEach(node -> node.setDisable(false));
                     quantityTextField.setDisable(false);
                     unitComboBox.setDisable(false);
                     deleteButton.setDisable(false);
@@ -688,10 +737,14 @@ public class RecipeWindowController {
             } else {
                 String oldValue = ingredient.getIngredient();
                 if (!oldValue.isBlank()) {
-                    //TODO user is not allowed to cancel completely what he typed to rewrite it
-                    //new Alert(Alert.AlertType.ERROR, "Ingredient field can't be empty").show();
-                    AlertDialog.alertError("Ingredient field can't be empty");
-                    ingredientTextField.setText(oldValue);
+                    suspendAutoSave = true;
+                    disableRecipeFields(true);
+                    titleTextField.setDisable(true);
+                    ingredientVBox.setDisable(false);
+                    ingredientVBox.getChildren().forEach(node -> node.setDisable(true));
+                    container.setDisable(false);
+                    container.getChildren().forEach(node -> node.setDisable(true));
+                    ingredientTextField.setDisable(false);
                 }
             }
         }

@@ -429,4 +429,20 @@ public class UtilsDB {
             deleteIngredient.executeUpdate();
         }
     }
+
+    /*static Set<String> getAllTags() throws SQLException {
+        Set<String> tags = new HashSet<>();
+
+        try (
+                Connection connection = dataSource.getConnection();
+                PreparedStatement getTags = connection.prepareStatement("SELECT tag FROM tag");
+                ResultSet rs = getTags.executeQuery()
+        ) {
+            while (rs.next()) {
+                tags.add(rs.getString("tag"));
+            }
+        }
+
+        return tags;
+    }*/
 }
