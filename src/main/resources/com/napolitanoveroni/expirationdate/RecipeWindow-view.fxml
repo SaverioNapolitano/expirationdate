@@ -20,7 +20,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="515.0" prefWidth="737.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.napolitanoveroni.expirationdate.RecipeWindowController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="515.0" prefWidth="737.0" style="-fx-background-color: #252525;" stylesheets="@styles/jmetro/dark_theme.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.napolitanoveroni.expirationdate.RecipeWindowController">
    <top>
       <MenuBar BorderPane.alignment="CENTER">
         <menus>
@@ -133,7 +133,7 @@
                   <HBox alignment="CENTER">
                      <children>
                         <Label text="Ingredients you have:" />
-                        <ProgressIndicator fx:id="ingredientsProgressIndicator" prefHeight="41.0" prefWidth="53.0" progress="0.0" />
+                        <ProgressIndicator fx:id="ingredientsProgressIndicator" prefHeight="41.0" prefWidth="53.0" progress="0.0" style="-fx-progress-color: #50862C;" />
                      </children>
                   </HBox>
                   <VBox fx:id="ingredientVBox" alignment="TOP_CENTER">

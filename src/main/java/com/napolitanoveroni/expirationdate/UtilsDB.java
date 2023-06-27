@@ -4,10 +4,9 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.control.Alert;
 
-import java.sql.*;
 import java.sql.Date;
+import java.sql.*;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
@@ -18,10 +17,6 @@ public class UtilsDB {
     public static LocalDate convertSQLDateToLocalDate(Date SQLDate) {
         java.util.Date date = new java.util.Date(SQLDate.getTime());
         return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-    }
-
-    public static void onSQLException(String message) {
-        new Alert(Alert.AlertType.ERROR, message).show();
     }
 
     static void dbConnection() throws SQLException {

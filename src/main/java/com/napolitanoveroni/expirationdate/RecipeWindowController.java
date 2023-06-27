@@ -95,7 +95,7 @@ public class RecipeWindowController {
             recipes = getRecipeData();
         } catch (SQLException e) {
             recipes = FXCollections.observableArrayList();
-            UtilsDB.onSQLException("Database Error: while loading data");
+            AlertDialog.alertError("Database Error: while loading data");
         }
 
         notExpiredProducts = new HashSet<>();
@@ -277,7 +277,7 @@ public class RecipeWindowController {
             }
             recipe.getTagList().add(index, newTag);
         } catch (SQLException e) {
-            onSQLException("Error while changing tags.");
+            AlertDialog.alertError("Error while changing tags.");
         }
     }
 
@@ -306,7 +306,7 @@ public class RecipeWindowController {
             editDBRecipeCategory(recipes.get(recipesIndex).getTitle(), categoryComboBoxSelected);
             recipes.get(recipesIndex).setCategory(categoryComboBoxSelected);
         } catch (SQLException e) {
-            onSQLException("Error while updating category");
+            AlertDialog.alertError("Error while updating category");
         }
     }
 
@@ -328,7 +328,7 @@ public class RecipeWindowController {
                 }
             }
         } catch (SQLException e) {
-            onSQLException("Error while removing recipe.");
+            AlertDialog.alertError("Error while removing recipe.");
         }
     }
 
@@ -346,10 +346,11 @@ public class RecipeWindowController {
             editDBRecipeDuration(recipe.getTitle(), newDuration);
             recipe.setDuration(newDuration);
         } catch (NumberFormatException e) {
-            new Alert(Alert.AlertType.ERROR, "What you typed wasn't a double number").show();
+            //new Alert(Alert.AlertType.ERROR, "What you typed wasn't a double number").show();
+            AlertDialog.alertError("What you typed wasn't a double number");
             durationTextField.setText(Double.toString(recipe.getDuration()));
         } catch (SQLException e) {
-            onSQLException("Error while updating duration.");
+            AlertDialog.alertError("Error while updating duration.");
         }
     }
 
@@ -367,10 +368,11 @@ public class RecipeWindowController {
             editDBRecipePortion(recipe.getTitle(), newPortions);
             recipe.setPortions(newPortions);
         } catch (NumberFormatException e) {
-            new Alert(Alert.AlertType.ERROR, "What you typed wasn't an integer number").show();
+            //new Alert(Alert.AlertType.ERROR, "What you typed wasn't an integer number").show();
+            AlertDialog.alertError("What you typed wasn't an integer number");
             portionsTextField.setText(Integer.toString(recipe.getPortions()));
         } catch (SQLException e) {
-            onSQLException("Error while updating portions.");
+            AlertDialog.alertError("Error while updating portions.");
         }
     }
 
@@ -381,7 +383,8 @@ public class RecipeWindowController {
 
         String newTitle = titleTextField.getText();
         if (newTitle.isBlank()) {
-            new Alert(Alert.AlertType.ERROR, "The title of the window can not be empty").show();
+            //new Alert(Alert.AlertType.ERROR, "The title of the window can not be empty").show();
+            AlertDialog.alertError("The title of the window can not be empty");
             disableRecipeFields(true);
             return;
         }
@@ -411,7 +414,7 @@ public class RecipeWindowController {
 
             disableRecipeFields(false);
         } catch (SQLException e) {
-            onSQLException("Error while inserting/editing recipe");
+            AlertDialog.alertError("Error while inserting/editing recipe");
         }
     }
 
@@ -429,7 +432,8 @@ public class RecipeWindowController {
                 mapper.writerWithDefaultPrettyPrinter().writeValue(file, recipes);
             }
         } catch (IOException e) {
-            new Alert(Alert.AlertType.ERROR, "Could not save data").showAndWait();
+            //new Alert(Alert.AlertType.ERROR, "Could not save data").showAndWait();
+            AlertDialog.alertError("Could not save data");
         }
     }
 
@@ -463,9 +467,10 @@ public class RecipeWindowController {
                 disableRecipeFields(false);
             }
         } catch (IOException e) {
-            new Alert(Alert.AlertType.ERROR, "Could not load data").showAndWait();
+            //new Alert(Alert.AlertType.ERROR, "Could not load data").showAndWait();
+            AlertDialog.alertError("Could not load data");
         } catch (SQLException e) {
-            onSQLException("Error while inserting recipes in the database.");
+            AlertDialog.alertError("Error while inserting recipes in the database.");
         }
     }
 
@@ -500,7 +505,7 @@ public class RecipeWindowController {
             });
 
         } catch (SQLException e) {
-            onSQLException("Error while updating unit");
+            AlertDialog.alertError("Error while updating unit");
         }
     }
     void allFieldsAutoSave(){
@@ -540,7 +545,7 @@ public class RecipeWindowController {
                 editDBRecipeSteps(recipe.getTitle(), steps);
                 recipe.setSteps(steps);
             } catch (SQLException e) {
-                onSQLException("Error while auto-saving steps.");
+                AlertDialog.alertError("Error while auto-saving steps.");
             }
         }
     }
@@ -678,12 +683,14 @@ public class RecipeWindowController {
                     unitComboBox.setDisable(false);
                     deleteButton.setDisable(false);
                 } catch (SQLException e) {
-                    onSQLException("Error while inserting ingredient.");
+                    AlertDialog.alertError("Error while inserting ingredient.");
                 }
             } else {
                 String oldValue = ingredient.getIngredient();
                 if (!oldValue.isBlank()) {
-                    new Alert(Alert.AlertType.ERROR, "Ingredient field can't be empty").show();
+                    //TODO user is not allowed to cancel completely what he typed to rewrite it
+                    //new Alert(Alert.AlertType.ERROR, "Ingredient field can't be empty").show();
+                    AlertDialog.alertError("Ingredient field can't be empty");
                     ingredientTextField.setText(oldValue);
                 }
             }
@@ -704,7 +711,8 @@ public class RecipeWindowController {
 
                     updateIngredient(ingredientIndex, ingredientList);
                 } catch (NumberFormatException e) {
-                    new Alert(Alert.AlertType.ERROR,"Error, the quantity typed is not a decimal number").show();
+                    //new Alert(Alert.AlertType.ERROR,"Error, the quantity typed is not a decimal number").show();
+                    AlertDialog.alertError("Error, the quantity typed is not a decimal number");
                     quantityTextField.setText(Double.toString(ingredient.getQuantity()));
                 }
 
@@ -735,7 +743,7 @@ public class RecipeWindowController {
                     ingredientList.add(ingredient);
                 }
             } catch (SQLException e) {
-                onSQLException("Error while updating ingredient");
+                AlertDialog.alertError("Error while updating ingredient");
             }
         }
 
@@ -750,7 +758,7 @@ public class RecipeWindowController {
 
                     deleteIngredientUI(this);
                 } catch (SQLException e) {
-                    onSQLException("Error while deleting ingredient");
+                    AlertDialog.alertError("Error while deleting ingredient");
                 }
             }
         }
@@ -776,7 +784,7 @@ public class RecipeWindowController {
                         removeDBRecipe(oldTitle);
                         recipes.remove(recipesIndex);
                     } catch (SQLException e) {
-                        onSQLException("Error while removing recipe.");
+                        AlertDialog.alertError("Error while removing recipe.");
                     }
 
                 }

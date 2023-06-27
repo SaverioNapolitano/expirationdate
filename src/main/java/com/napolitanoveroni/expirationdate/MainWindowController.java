@@ -63,6 +63,7 @@ public class MainWindowController {
 
     private boolean cancelEditProduct = false;
 
+
     /*
 
 
@@ -81,7 +82,7 @@ public class MainWindowController {
             expirationList = getProductData();
         } catch (SQLException e) {
             expirationList = FXCollections.observableArrayList();
-            UtilsDB.onSQLException("Database Error: while loading data");
+            AlertDialog.alertError("Database Error: while loading data");
         }
 
         expirationListTableView.setItems(expirationList);
@@ -181,14 +182,6 @@ public class MainWindowController {
         createExecuteICS(iCal);
     }
 
-    void showNoProductSelectedAlert() {
-        Alert alert = new Alert(Alert.AlertType.WARNING);
-        alert.setTitle("No Selection");
-        alert.setHeaderText("No Product Selected");
-        alert.setContentText("Please select a product in the table.");
-        alert.showAndWait();
-    }
-
     /**
      * Returns the index of the selected person in the TableView component
      *
@@ -214,7 +207,7 @@ public class MainWindowController {
                 removeDBProduct(oldProduct);
                 expirationListTableView.getItems().remove(expirationListTableView.getSelectionModel().getSelectedIndex());
             } catch (SQLException ex) {
-                UtilsDB.onSQLException(onSQLExceptionMessage);
+                AlertDialog.alertError(onSQLExceptionMessage);
             }
         });
     }
@@ -244,7 +237,8 @@ public class MainWindowController {
 
             return initialValue;
         } catch (NoSuchElementException e) {
-            showNoProductSelectedAlert();
+            //showNoProductSelectedAlert();
+            AlertDialog.alertWarning("No Selection", "No Product Selected", "Please select a product in the table.");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -288,9 +282,11 @@ public class MainWindowController {
 
             expirationListTableView.getItems().remove(selectedIndex);
         } catch (SQLException e) {
-            UtilsDB.onSQLException("Database Error while removing item");
+            //UtilsDB.onSQLException("Database Error while removing item");
+            AlertDialog.alertError("Database Error while removing item.");
         } catch (NoSuchElementException e) {
-            showNoProductSelectedAlert();
+            //showNoProductSelectedAlert();
+            AlertDialog.alertWarning("No Selection", "No Product Selected", "Please select a product in the table.");
         }
 
 
@@ -309,7 +305,7 @@ public class MainWindowController {
                 editDBProductAllField(oldProduct, editedProduct, this);
                 expirationListTableView.getItems().set(selectedIndex, editedProduct);
             } catch (SQLException e) {
-                UtilsDB.onSQLException(onSQLExceptionMessage);
+                AlertDialog.alertError(onSQLExceptionMessage);
             }
         }
 
@@ -331,7 +327,7 @@ public class MainWindowController {
             editDBProductName(oldProduct, newName, this);
             oldProduct.setProductName(newName);
         } catch (SQLException exception) {
-            UtilsDB.onSQLException(onSQLExceptionMessage);
+            AlertDialog.alertError(onSQLExceptionMessage);
         }
     }
 
@@ -365,7 +361,8 @@ public class MainWindowController {
     void onRecipesExpirationListButtonClicked(ActionEvent ignoredEvent) throws IOException {
 
         Stage stage = new Stage();
-        FXMLLoader fxmlLoader = new FXMLLoader(ExpirationDateApplication.class.getResource("RecipeWindow-view.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(ExpirationDateApplication.class.getResource("RecipeWindow-view-copy" +
+                ".fxml"));
 
         Scene scene = new Scene(fxmlLoader.load());
 
@@ -429,7 +426,8 @@ public class MainWindowController {
             productTextField.setOnAction(this::onEnterShoppingTextField);
 
             deleteButton = new Button("");
-            ImageView imageView = new ImageView("com/napolitanoveroni/expirationdate/images/delete-icon-shoppingList.png");
+            ImageView imageView = new ImageView("com/napolitanoveroni/expirationdate/icons/white-delete-shoppingList" +
+                    "-icon.png");
             imageView.setFitWidth(25);
             imageView.setPreserveRatio(true);
             deleteButton.setGraphic(imageView);

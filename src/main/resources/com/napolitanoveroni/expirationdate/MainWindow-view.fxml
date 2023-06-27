@@ -14,7 +14,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.napolitanoveroni.expirationdate.MainWindowController">
+<BorderPane fx:id="overviewBorderPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" stylesheets="@styles/jmetro/dark_theme.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.napolitanoveroni.expirationdate.MainWindowController">
    <center>
       <SplitPane dividerPositions="0.5451203208556149" prefHeight="160.0" prefWidth="200.0" BorderPane.alignment="CENTER">
          <items>
@@ -31,7 +31,7 @@
                   </TableView>
                </center>
                <bottom>
-                  <HBox alignment="CENTER" prefHeight="26.0" prefWidth="268.0" spacing="10.0">
+                  <HBox alignment="CENTER" spacing="10.0">
                      <BorderPane.margin>
                         <Insets left="10.0" />
                      </BorderPane.margin>
@@ -40,7 +40,7 @@
                            <graphic>
                               <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
-                                    <Image url="@images/new-icon.png" />
+                                    <Image url="@icons/white-plus-icon.png" />
                                  </image>
                               </ImageView>
                            </graphic></Button>
@@ -48,7 +48,7 @@
                            <graphic>
                               <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
-                                    <Image url="@images/delete-icon.png" />
+                                    <Image url="@icons/white-delete-icon.png" />
                                  </image>
                               </ImageView>
                            </graphic></Button>
@@ -56,7 +56,7 @@
                            <graphic>
                               <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
-                                    <Image url="@images/cooking-book-icon.png" />
+                                    <Image url="@icons/white-cooking-book-icons.png" />
                                  </image>
                               </ImageView>
                            </graphic></Button>
@@ -84,7 +84,7 @@
                      <graphic>
                         <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
                            <image>
-                              <Image url="@images/clear-icon.png" />
+                              <Image url="@icons/white-clear-icon.png" />
                            </image>
                         </ImageView>
                      </graphic></Button>
