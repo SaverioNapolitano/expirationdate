@@ -10,8 +10,7 @@ import java.io.IOException;
 public class ExpirationDateApplication extends Application {
     @Override
     public void start(Stage stage) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(ExpirationDateApplication.class.getResource("MainWindow-view-copy" +
-                ".fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(ExpirationDateApplication.class.getResource("MainWindow-view.fxml"));
         Scene scene = new Scene(fxmlLoader.load());
         stage.setTitle("Expiration Date");
         stage.setScene(scene);

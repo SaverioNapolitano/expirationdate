@@ -361,8 +361,7 @@ public class MainWindowController {
     void onRecipesExpirationListButtonClicked(ActionEvent ignoredEvent) throws IOException {
 
         Stage stage = new Stage();
-        FXMLLoader fxmlLoader = new FXMLLoader(ExpirationDateApplication.class.getResource("RecipeWindow-view-copy" +
-                ".fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(ExpirationDateApplication.class.getResource("RecipeWindow-view.fxml"));
 
         Scene scene = new Scene(fxmlLoader.load());
 
