@@ -430,7 +430,7 @@ public class UtilsDB {
         }
     }
 
-    /*static Set<String> getAllTags() throws SQLException {
+    static Set<String> getAllTags() throws SQLException {
         Set<String> tags = new HashSet<>();
 
         try (
@@ -444,5 +444,5 @@ public class UtilsDB {
         }
 
         return tags;
-    }*/
+    }
 }

@@ -80,7 +80,7 @@ public class RecipeWindowController {
 
     Set<String> notExpiredProducts;
 
-//    Set<String> existingTags;
+    Set<String> existingTags;
 
     public void setNotExpiredProducts(Set<String> notExpiredProducts) {
         this.notExpiredProducts = notExpiredProducts;
@@ -95,7 +95,7 @@ public class RecipeWindowController {
         try {
             dbConnection();
             recipes = getRecipeData();
-//            existingTags = getAllTags();
+            existingTags = getAllTags();
         } catch (SQLException e) {
             recipes = FXCollections.observableArrayList();
             AlertDialog.alertError("Database Error: while loading data");
@@ -112,6 +112,18 @@ public class RecipeWindowController {
         recipesIndex = 0;
 
         categoryComboBox.setItems(FXCollections.observableArrayList("first course", "second course", "dessert", "side dish"));
+
+        tagGridPane.getChildren().forEach(node -> {
+            ComboBox<String> comboBox = (ComboBox<String>) node;
+            comboBox.setItems(FXCollections.observableArrayList(existingTags));
+        });
+
+        for (Node node : tagGridPane.getChildren()) {
+            if (node instanceof ComboBox<?> comboBox) {
+                ComboBox<String> tag = (ComboBox<String>) comboBox;
+                tag.setItems(FXCollections.observableArrayList(existingTags));
+            }
+        }
 
         suspendAutoSave = false;
 
@@ -217,12 +229,12 @@ public class RecipeWindowController {
 
     @FXML
     void onEnterTagComboBox(ActionEvent event) {
+        if(suspendAutoSave){
+            return;
+        }
+
         ComboBox<String> comboBox = (ComboBox<String>)event.getSource();
         int index = tagGridPane.getChildren().indexOf(comboBox);
-
-        /*if (index == -1) {
-            return;
-        }*/
 
         Recipe recipe = recipes.get(recipesIndex);
         String title = recipe.getTitle();
@@ -233,7 +245,7 @@ public class RecipeWindowController {
         if (index < recipe.getTagList().size()) {
             oldTag = recipe.getTagList().get(index);
 
-            if (oldTag.equals(newTag)) {
+            if (oldTag.equals(newTag) || recipe.getTagList().contains(newTag)) {
                 return;
             }
         } else {
@@ -263,7 +275,7 @@ public class RecipeWindowController {
         if (!((ComboBox<String>)(tagGridPane.getChildren().get(tagGridPane.getChildren().size() - 1))).getEditor().getText().isBlank()) {
             int lastIndex = tagGridPane.getChildren().size();
             ComboBox<String> newComboBoxTag = new ComboBox<>();
-//            newComboBoxTag.setItems(FXCollections.observableArrayList(existingTags));
+            newComboBoxTag.setItems(FXCollections.observableArrayList(existingTags));
             newComboBoxTag.setEditable(true);
             newComboBoxTag.getEditor().setPromptText("Add tag...");
 
@@ -274,23 +286,6 @@ public class RecipeWindowController {
             newComboBoxTag.setOnAction(this::onEnterTagComboBox);
             GridPane.setMargin(newComboBoxTag, new Insets(0,5,0,5));
         }
-
-        /*List<String> tagList = recipes.get(recipesIndex).getTagList();
-
-        if (tagList.contains(newTag)) {
-            suspendAutoSave = true;
-            disableRecipeFields(true);
-            titleTextField.setDisable(true);
-            tagGridPane.setDisable(false);
-            tagGridPane.getChildren().forEach(node -> node.setDisable(true));
-            tagGridPane.getChildren().get(index).setDisable(false);
-            return;
-        } else {
-            suspendAutoSave = false;
-            disableRecipeFields(false);
-            titleTextField.setDisable(false);
-            tagGridPane.getChildren().forEach(node -> node.setDisable(false));
-        }*/
 
         try {
             try {
@@ -303,15 +298,27 @@ public class RecipeWindowController {
             insertDBTag(title, newTag);
             recipe.getTagList().add(index, newTag);
 
-            /*existingTags.add(newTag);
-            tagGridPane.getChildren().forEach(
-                node -> {
-                    ComboBox<String> comboBox1 = (ComboBox<String>) node;
-                    comboBox1.setItems(FXCollections.observableArrayList(existingTags));
-                });*/
+
+            //existingTags.add(newTag);
+
         }
         catch (SQLException e) {
             AlertDialog.alertError("Error while changing tags.");
+        }
+
+        try {
+            existingTags = getAllTags();
+            suspendAutoSave = true;
+            tagGridPane.getChildren().forEach(
+                    node -> {
+                        ComboBox<String> comboBox1 = (ComboBox<String>) node;
+                        if(!comboBox1.getItems().contains(newTag)){
+                            comboBox1.setItems(FXCollections.observableArrayList(existingTags));
+                        }
+                    });
+            suspendAutoSave = false;
+        } catch (SQLException e) {
+            AlertDialog.alertError("Error while updating tags.");
         }
     }
 
@@ -533,10 +540,7 @@ public class RecipeWindowController {
 
         try {
             editDBRecipeUnit(recipes.get(recipesIndex).getTitle(), unitComboBoxSelected);
-            recipes.get(recipesIndex).setUnit(switch (unitComboBoxSelected) {
-                case 0 -> durationUnit.MIN;
-                default -> durationUnit.H;
-            });
+            recipes.get(recipesIndex).setUnit(unitComboBoxSelected == 0 ? durationUnit.MIN : durationUnit.H);
 
         } catch (SQLException e) {
             AlertDialog.alertError("Error while updating unit");
@@ -548,8 +552,8 @@ public class RecipeWindowController {
         }
         onEnterTitleTextField(new ActionEvent());
 
-        for (Node tag : tagGridPane.getChildren()) {
-            onEnterTagComboBox(new ActionEvent(tag, null));
+        for (Node node : tagGridPane.getChildren()) {
+            onEnterTagComboBox(new ActionEvent(node, null));
         }
 
         for (Node hBoxNode : ingredientVBox.getChildren()) {
@@ -575,6 +579,7 @@ public class RecipeWindowController {
                 for (Node node : hBox.getChildren()) {
                     if (node instanceof ComboBox<?> comboBox) {
                         comboBox.getOnAction().handle(new ActionEvent());
+
                     }
                 }
             }
@@ -703,7 +708,7 @@ public class RecipeWindowController {
             setIngredient(ingredient);
         }
 
-        void onEnterIngredientTextField(ActionEvent event) {
+        void onEnterIngredientTextField(ActionEvent ignoredEvent) {
             String newIngredient = ingredientTextField.getText();
 
             if (!newIngredient.isBlank()) {
