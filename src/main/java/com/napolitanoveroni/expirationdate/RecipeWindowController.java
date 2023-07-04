@@ -67,9 +67,6 @@ public class RecipeWindowController {
     @FXML
     private MenuItem addMenuitem;
 
-    @FXML
-    private Menu fileMenu;
-
     private ObservableList<Recipe> recipes;
     int recipesIndex;
 
