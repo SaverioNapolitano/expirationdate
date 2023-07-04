@@ -1,5 +1,6 @@
+![](src/main/resources/com/napolitanoveroni/expirationdate/icons/app-icon.png)
 
-This application was designed to help people managing their food related issues. If you find this useful star the project!
+This application was designed to help people manage their food-related issues.
 
 # Table of contents
 - [Overview](README.md#overview)
@@ -19,15 +20,15 @@ The application consists of 2 main views:
 
 # Features
 - Shopping list
-	- Add, remove, edit products in shopping list
+	- Add, remove, edit products in the shopping list
 	- Mark products as bought and automatically add them to the pantry list
-	- You can clear the bought products clicking on the bin icon at the bottom
+	- You can clear the bought products by clicking on the bin icon at the bottom
 - Pantry list
 	- Add, remove, edit products with their name and expiration date
-		- You can edit the name by double clicking on its field
-		- If you double click the date you can edit the product's details through a dedicated view ![](readme-images/edit-product.png)
+		- You can edit the name by double-clicking on its field
+		- If you double-click the date, you can edit the product's details through a dedicated view ![](readme-images/edit-product.png)
 	- Products are stored on a database, so data will not be lost when you close the application!
-	- When you add, edit or delete a product it is mirrored also on your personal calendar, in this way you will be notified when a product is expiring
+	- When you add, edit or delete a product, it is mirrored also on your personal calendar. In this way you will be notified when a product is expiring
 - Recipe window
 	- you can swipe from a recipe to another one
 	- you can view and edit the recipe. Each recipe has these fields
