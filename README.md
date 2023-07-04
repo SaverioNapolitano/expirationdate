@@ -47,3 +47,4 @@ The application consists of 2 main views:
 - Calendar integration: [biweekly](https://github.com/mangstadt/biweekly)
 - JSON import/export: [jackson-core](https://github.com/FasterXML/jackson-core), [jackson-databind](https://github.com/FasterXML/jackson-annotations), [jackson-datatype](https://github.com/FasterXML/jackson-databind)
 - Database: [MySQL](https://www.mysql.com/), [HikariCP](https://mvnrepository.com/artifact/com.zaxxer/HikariCP)
+- Icons: [icons8](https://icons8.com), [the noun project](https://thenounproject.com)
