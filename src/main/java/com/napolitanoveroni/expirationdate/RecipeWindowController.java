@@ -199,7 +199,6 @@ public class RecipeWindowController {
         ingredientVBox.setDisable(disable);
         leftButton.setDisable(disable);
         rightButton.setDisable(disable);
-        fileMenu.setDisable(disable);
         addMenuitem.setDisable(disable);
     }
 
