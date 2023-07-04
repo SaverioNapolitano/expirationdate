@@ -7,26 +7,26 @@ This application was designed to help people managing their food related issues.
 - [Credits](README.md#credits)
 
 # Overview
-The application consists in 2 main views:
+The application consists of 2 main views:
 
 |                Main view ![main-view.png](readme-images/main-view.png)                |
 |:-------------------------------------------------------------------------------------:|
-| On the right you can manage the shopping list, on the left you can manage your pantry |
+| On the right you can manage the shopping list, on the left you can manage your pantry. |
 
 | The recipe view ![](readme-images/recipe-view.png) |
 | :---: |
-| In this view you can write and edit recipes and see which products needed for the recipe are already available. |
+| In this view you can write and edit your own recipes and see which products needed for the recipe are already in your pantry. |
 
 # Features
 - Shopping list
-	- Add, remove, edit items in shopping list
-	- Mark products as bought and automatically add to the pantry list
-	- You can clear the already taken items clicking on the bin icon on the bottom
+	- Add, remove, edit products in shopping list
+	- Mark products as bought and automatically add them to the pantry list
+	- You can clear the bought products clicking on the bin icon at the bottom
 - Pantry list
 	- Add, remove, edit products with their name and expiration date
 		- You can edit the name by double clicking on its field
-		- If you double click the date you can edit the product's details through this view ![](readme-images/edit-product.png)
-	- Items are stored on a database, so data will not be lost after you close the application!
+		- If you double click the date you can edit the product's details through a dedicated view ![](readme-images/edit-product.png)
+	- Products are stored on a database, so data will not be lost when you close the application!
 	- When you add, edit or delete a product it is mirrored also on your personal calendar, in this way you will be notified when a product is expiring
 - Recipe window
 	- you can swipe from a recipe to another one
