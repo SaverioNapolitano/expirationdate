@@ -2,9 +2,9 @@
 This application was designed to help people managing their food related issues. If you find this useful star the project!
 
 # Table of contents
-- [Overview](README#Overview)
-- [Features](README#Features)
-- [Credits](README#Credits)
+- [Overview](README.md#overview)
+- [Features](README.md#features)
+- [Credits](README.md#credits)
 
 # Overview
 The application consists in 2 main views:
