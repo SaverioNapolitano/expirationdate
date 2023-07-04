@@ -12,6 +12,8 @@
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
@@ -40,17 +42,31 @@
       </MenuBar>
    </top>
    <left>
-      <Button fx:id="leftButton" mnemonicParsing="false" onAction="#onLeftButtonClicked" text="&lt;" BorderPane.alignment="CENTER">
+      <Button fx:id="leftButton" mnemonicParsing="false" onAction="#onLeftButtonClicked" BorderPane.alignment="CENTER">
          <BorderPane.margin>
             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
          </BorderPane.margin>
+         <graphic>
+            <ImageView fitHeight="20.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@icons/left-arrow-white.png" />
+               </image>
+            </ImageView>
+         </graphic>
       </Button>
    </left>
    <right>
-      <Button fx:id="rightButton" mnemonicParsing="false" onAction="#onRightButtonClicked" text="&gt;" BorderPane.alignment="CENTER">
+      <Button fx:id="rightButton" mnemonicParsing="false" onAction="#onRightButtonClicked" BorderPane.alignment="CENTER">
          <BorderPane.margin>
             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
          </BorderPane.margin>
+         <graphic>
+            <ImageView fitHeight="20.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@icons/right-arrow-white.png" />
+               </image>
+            </ImageView>
+         </graphic>
       </Button>
    </right>
    <center>
@@ -141,7 +157,14 @@
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                      </VBox.margin>
                      <children>
-                        <Button mnemonicParsing="false" onAction="#onAddIngredientButtonClicked" text="+" />
+                        <Button mnemonicParsing="false" onAction="#onAddIngredientButtonClicked">
+                           <graphic>
+                              <ImageView fitHeight="20.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@icons/rounded-add-white.png" />
+                                 </image>
+                              </ImageView>
+                           </graphic></Button>
                      </children>
                   </VBox>
                   <Separator />

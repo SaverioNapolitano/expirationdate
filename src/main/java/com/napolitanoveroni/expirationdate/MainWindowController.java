@@ -26,6 +26,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
@@ -226,6 +227,10 @@ public class MainWindowController {
             dialog.setTitle("Edit Product");
             dialog.initModality(Modality.APPLICATION_MODAL);
             dialog.setDialogPane(view);
+            //ImageView icon = new ImageView("com/napolitanoveroni/expirationdate/icons/app-icon.png");
+            Stage stage = (Stage) dialog.getDialogPane().getScene().getWindow();
+            stage.getIcons().add(
+                    new Image(Objects.requireNonNull(this.getClass().getResource("icons/app-icon.png")).toString()));
 
             // Show the dialog and wait until the user closes it
             Optional<ButtonType> clickedButton = dialog.showAndWait();
@@ -381,6 +386,7 @@ public class MainWindowController {
         scene.getWindow().addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST,
                 controller::onWindowCloseRequest);
 
+        stage.getIcons().add(new Image(Objects.requireNonNull(getClass().getResourceAsStream("icons/app-icon.png"))));
         stage.show();
     }
 

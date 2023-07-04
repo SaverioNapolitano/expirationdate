@@ -12,6 +12,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
@@ -664,7 +665,11 @@ public class RecipeWindowController {
 
             Label unitLabel = new Label("Unit: ");
 
-            deleteButton = new Button("X");
+            ImageView imageView = new ImageView("com/napolitanoveroni/expirationdate/icons/white-delete-shoppingList-icon.png");
+            imageView.setPreserveRatio(true);
+            deleteButton = new Button();
+            deleteButton.setGraphic(imageView);
+            imageView.setFitWidth(20);
 
             unitComboBox = new ComboBox<>(FXCollections.observableArrayList("g", "kg", "ml", "l", "spoons"));
             unitComboBox.getEditor().setPromptText("Add unit of measurement...");
