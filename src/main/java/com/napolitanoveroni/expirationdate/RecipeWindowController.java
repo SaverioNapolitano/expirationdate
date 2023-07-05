@@ -641,12 +641,25 @@ public class RecipeWindowController {
         private ComboBox<String> unitComboBox;
         private Button deleteButton;
 
+        public void setIcon() {
+            ImageView icon = notExpiredProducts.contains(this.ingredient.getIngredient()) ? new ImageView("com/napolitanoveroni" + "/expirationdate/icons/white-plus-icon.png") : new ImageView("com/napolitanoveroni/expirationdate/icons/delete-icon.png");
+            icon.setPreserveRatio(true);
+            icon.setFitHeight(20);
+
+            container.getChildren().remove(container.getChildren().size() - 1);
+            container.getChildren().add(icon);
+        }
+
+
+
         public IngredientUI(String recipeTitle, Ingredient ingredient) {
             setRecipeTitle(recipeTitle);
 
             initializeGraphics();
 
             setIngredient(ingredient);
+
+            setIcon();
         }
 
         public void setRecipeTitle(String recipeTitle) {
@@ -674,7 +687,8 @@ public class RecipeWindowController {
             unitComboBox = new ComboBox<>(FXCollections.observableArrayList("g", "kg", "ml", "l", "spoons"));
             unitComboBox.getEditor().setPromptText("Add unit of measurement...");
 
-            container = new HBox(ingredientTextField, quantityLabel, quantityTextField, unitLabel, unitComboBox, deleteButton);
+            container = new HBox(ingredientTextField, quantityLabel, quantityTextField, unitLabel, unitComboBox,
+                    deleteButton, new ImageView());
 
             ingredientTextField.setOnAction(this::onEnterIngredientTextField);
 
@@ -733,6 +747,8 @@ public class RecipeWindowController {
 
                     insertDBIngredient(recipeTitle, ingredient);
                     ingredientList.add(ingredient);
+
+                    setIcon();
 
                     suspendAutoSave = false;
                     disableRecipeFields(false);
