@@ -6,37 +6,37 @@ import javafx.scene.image.ImageView;
 
 public class AlertDialog {
 
-    public static void alertWarning(String title, String header, String content) {
-        Alert alert = new Alert(Alert.AlertType.WARNING);
+	public static void alertWarning(String title, String header, String content) {
+		Alert alert = new Alert(Alert.AlertType.WARNING);
 
-        alert.setTitle(title);
-        alert.setHeaderText(header);
-        alert.setContentText(content);
+		alert.setTitle(title);
+		alert.setHeaderText(header);
+		alert.setContentText(content);
 
-        alert.getDialogPane().getStylesheets().add("com/napolitanoveroni/expirationdate" + "/styles/jmetro/dark_theme.css");
+		alert.getDialogPane().getStylesheets().add("com/napolitanoveroni/expirationdate" + "/styles/jmetro/dark_theme.css");
 
-        ImageView imageView = new ImageView("com/napolitanoveroni/expirationdate/icons/white-warning-icon.png");
+		ImageView imageView = new ImageView("com/napolitanoveroni/expirationdate/icons/white-warning-icon.png");
 
-        imageView.setFitWidth(40);
-        imageView.setPreserveRatio(true);
+		imageView.setFitWidth(40);
+		imageView.setPreserveRatio(true);
 
-        alert.setGraphic(imageView);
+		alert.setGraphic(imageView);
 
-        alert.show();
-    }
+		alert.show();
+	}
 
-    public static void alertError(String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR, message);
+	public static void alertError(String message) {
+		Alert alert = new Alert(Alert.AlertType.ERROR, message);
 
-        alert.getDialogPane().getStylesheets().add("com/napolitanoveroni/expirationdate" + "/styles/jmetro/dark_theme.css");
+		alert.getDialogPane().getStylesheets().add("com/napolitanoveroni/expirationdate" + "/styles/jmetro/dark_theme.css");
 
-        ImageView imageView = new ImageView("com/napolitanoveroni/expirationdate/icons/white-sqlerror-icon.png");
-        imageView.setFitWidth(40);
-        imageView.setPreserveRatio(true);
-        imageView.setNodeOrientation(NodeOrientation.INHERIT);
+		ImageView imageView = new ImageView("com/napolitanoveroni/expirationdate/icons/white-sqlerror-icon.png");
+		imageView.setFitWidth(40);
+		imageView.setPreserveRatio(true);
+		imageView.setNodeOrientation(NodeOrientation.INHERIT);
 
-        alert.setGraphic(imageView);
+		alert.setGraphic(imageView);
 
-        alert.show();
-    }
+		alert.show();
+	}
 }
