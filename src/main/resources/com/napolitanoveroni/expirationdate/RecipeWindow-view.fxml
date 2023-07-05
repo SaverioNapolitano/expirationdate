@@ -74,7 +74,7 @@
          <content>
             <VBox alignment="TOP_CENTER">
                <children>
-                  <TextField fx:id="titleTextField" alignment="CENTER" onAction="#onEnterTitleTextField" promptText="Add title...">
+                  <TextField fx:id="titleTextField" alignment="CENTER" onAction="#onEnterTitleTextField" promptText="Add title..." style="-fx-font-size: 33;">
                      <VBox.margin>
                         <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                      </VBox.margin>
