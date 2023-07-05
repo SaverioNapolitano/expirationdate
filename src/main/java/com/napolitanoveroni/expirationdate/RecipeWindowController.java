@@ -642,12 +642,13 @@ public class RecipeWindowController {
         private Button deleteButton;
 
         public void setIcon() {
-            ImageView icon = notExpiredProducts.contains(this.ingredient.getIngredient()) ? new ImageView("com/napolitanoveroni" + "/expirationdate/icons/white-plus-icon.png") : new ImageView("com/napolitanoveroni/expirationdate/icons/delete-icon.png");
+            ImageView icon = notExpiredProducts.contains(this.ingredient.getIngredient()) ? new ImageView("com/napolitanoveroni/expirationdate/icons/tick-icon.png") : new ImageView("com/napolitanoveroni/expirationdate/icons/not-taken-icon.png");
             icon.setPreserveRatio(true);
             icon.setFitHeight(20);
 
             container.getChildren().remove(container.getChildren().size() - 1);
             container.getChildren().add(icon);
+            HBox.setMargin(icon, new Insets(0, 10, 0, 10));
         }
 
 
@@ -709,7 +710,7 @@ public class RecipeWindowController {
 
             HBox.setMargin(quantityLabel, new Insets(0, 5, 0, 10));
             HBox.setMargin(unitLabel, new Insets(0, 5, 0, 10));
-            HBox.setMargin(deleteButton, new Insets(0, 5, 0, 15));
+            HBox.setMargin(deleteButton, new Insets(0, 5, 0, 10));
         }
 
         public void setIngredient(Ingredient ingredient) {

@@ -416,7 +416,7 @@ public class MainWindowController {
             productTextField.setOnAction(this::onEnterShoppingTextField);
 
             deleteButton = new Button("");
-            ImageView imageView = new ImageView("com/napolitanoveroni/expirationdate/icons/white-delete-shoppingList" + "-icon.png");
+            ImageView imageView = new ImageView("com/napolitanoveroni/expirationdate/icons/white-delete-shoppingList-icon.png");
             imageView.setFitWidth(25);
             imageView.setPreserveRatio(true);
             deleteButton.setGraphic(imageView);
