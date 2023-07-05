@@ -10,52 +10,12 @@ public class Product {
     int quantity;
     double price;
 
-    public String getProductName() {
-        return productName;
-    }
-
-    public void setProductName(String productName) {
-        this.productName = productName;
-    }
-
-    public String getCategoryName() {
-        return categoryName;
-    }
-
-    public void setCategoryName(String categoryName) {
-        this.categoryName = categoryName;
-    }
-
     public Product() {
         setProductName("");
         setExpirationDate(LocalDate.now());
         setCategoryName("");
         setQuantity(1);
         setPrice(0);
-    }
-
-    public double getPrice() {
-        return price;
-    }
-
-    public void setPrice(double price) {
-        this.price = price;
-    }
-
-    public int getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
-
-    public LocalDate getExpirationDate() {
-        return expirationDate;
-    }
-
-    public void setExpirationDate(LocalDate expirationDate) {
-        this.expirationDate = expirationDate;
     }
 
     public Product(String productName, LocalDate expirationDate, String categoryName, int quantity, double price) {
@@ -82,6 +42,51 @@ public class Product {
         setPrice(other.getPrice());
     }
 
+    public String getProductName() {
+        return productName;
+    }
+
+    public void setProductName(String productName) {
+        this.productName = productName;
+    }
+
+    public LocalDate getExpirationDate() {
+        return expirationDate;
+    }
+
+    public String getCategoryName() {
+        return categoryName;
+    }
+
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
+    public void setExpirationDate(LocalDate expirationDate) {
+        this.expirationDate = expirationDate;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(productName, expirationDate, categoryName, quantity, price);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o)
@@ -90,10 +95,5 @@ public class Product {
             return false;
         Product product = (Product) o;
         return quantity == product.quantity && Double.compare(product.price, price) == 0 && Objects.equals(productName, product.productName) && Objects.equals(expirationDate, product.expirationDate) && Objects.equals(categoryName, product.categoryName);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(productName, expirationDate, categoryName, quantity, price);
     }
 }

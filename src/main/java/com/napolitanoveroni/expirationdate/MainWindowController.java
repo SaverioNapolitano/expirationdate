@@ -48,17 +48,13 @@ import static com.napolitanoveroni.expirationdate.UtilsDB.*;
 
 public class MainWindowController {
 
+    ObservableList<Product> expirationList;
     @FXML
     private TableColumn<Product, LocalDate> expirationListExpirationDateColumn;
-
     @FXML
     private TableColumn<Product, String> expirationListProductColumn;
-
     @FXML
     private TableView<Product> expirationListTableView;
-
-    ObservableList<Product> expirationList;
-
     @FXML
     private VBox shoppingListVBox;
 
@@ -111,23 +107,7 @@ public class MainWindowController {
 
      */
 
-    void createExecuteICS(ICalendar iCalendar){
-        File file = new File("temp.ics");
-        try (ICalWriter writer = new ICalWriter(file, ICalVersion.V2_0)) {
-            writer.write(iCalendar);
-        } catch (IOException e) {
-            new Alert(Alert.AlertType.ERROR, "Error during calendar event creation").showAndWait();
-        }
-
-        Desktop desktop = Desktop.getDesktop();
-        try {
-            desktop.open(file);
-        } catch (IOException e) {
-            new Alert(Alert.AlertType.ERROR, "Error while running calendar event").showAndWait();
-        }
-    }
-
-    void editCalendarEvent(Product oldProduct, Product newProduct){
+    void editCalendarEvent(Product oldProduct, Product newProduct) {
         //TODO: see https://datatracker.ietf.org/doc/html/rfc5546#page-80 for updating an existing event
         deleteCalendarEvent(oldProduct);
         try {
@@ -138,68 +118,10 @@ public class MainWindowController {
         addCalendarEvent(newProduct);
     }
 
-    void deleteCalendarEvent(Product product){
-
-        String uid = product.getProductName() + product.getExpirationDate().toString();
-        ICalendar iCal = new ICalendar();
-        iCal.setMethod("CANCEL");
-        VEvent event = new VEvent();
-        event.setOrganizer(new Organizer("expirationdate", "")); //the organizer of the existing event
-        event.setUid(uid); //the UID of the existing event
-        event.setSequence(1);
-        event.setStatus(Status.cancelled());
-        Summary summary = event.setSummary(product.getProductName());
-        summary.setLanguage("en-us");
-
-        event.setDateStart(DateUtils.asDate(product.getExpirationDate()), false);
-
-        iCal.addEvent(event);
-
-        createExecuteICS(iCal);
-
-    }
-
-    void addCalendarEvent(Product product) {
-        ICalendar iCal = new ICalendar();
-        VEvent event = new VEvent();
-        Summary summary = event.setSummary(product.getProductName());
-        summary.setLanguage("en-us");
-
-        event.setDateStart(DateUtils.asDate(product.getExpirationDate()), false);
-
-        Duration triggerDuration = Duration.builder().prior(true).days(1).build();
-        Trigger trigger = new Trigger(triggerDuration, Related.START);
-        VAlarm alarm = VAlarm.display(trigger, product.getProductName() + " is expiring.");
-        event.addAlarm(alarm);
-
-        iCal.addEvent(event);
-
-        String uid = product.getProductName() + product.getExpirationDate().toString();
-
-        event.setOrganizer(new Organizer("expirationdate", ""));
-        event.setSequence(1);
-        event.setUid(uid);
-
-        createExecuteICS(iCal);
-    }
-
-    /**
-     * Returns the index of the selected person in the TableView component
-     *
-     * @return the index of the selected person
-     */
-    int selectedIndex() throws NoSuchElementException {
-        int selectedIndex = expirationListTableView.getSelectionModel().getSelectedIndex();
-        if (selectedIndex < 0) {
-            throw new NoSuchElementException();
-        }
-        return selectedIndex;
-    }
-
     void onOverlappingProducts(Product oldProduct, String newName, LocalDate newExpirationDate) {
         final String onSQLExceptionMessage = "Database Error while editing item";
 
-        // In this case we renamed a product to an already existing item with the same expiration date
+        // In this case, we renamed a product to an already existing item with the same expiration date
         expirationList.stream().filter(product -> product.getProductName().equals(newName) && product.getExpirationDate().equals(newExpirationDate)).forEach(product -> {
             int newQuantity = product.getQuantity() + oldProduct.getQuantity();
             try {
@@ -213,52 +135,10 @@ public class MainWindowController {
         });
     }
 
-    public Product actionOnProduct(Product initialValue) {
-        try {
-            FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(getClass().getResource("EditProduct-view.fxml"));
-            DialogPane view = loader.load();
-            EditProductController controller = loader.getController();
-
-            controller.setProduct(new Product(initialValue));
-
-            // Create the dialog
-            Dialog<ButtonType> dialog = new Dialog<>();
-            dialog.setTitle("Edit Product");
-            dialog.initModality(Modality.APPLICATION_MODAL);
-            dialog.setDialogPane(view);
-            //ImageView icon = new ImageView("com/napolitanoveroni/expirationdate/icons/app-icon.png");
-            Stage stage = (Stage) dialog.getDialogPane().getScene().getWindow();
-            stage.getIcons().add(
-                    new Image(Objects.requireNonNull(this.getClass().getResource("icons/app-icon.png")).toString()));
-
-            // Show the dialog and wait until the user closes it
-            Optional<ButtonType> clickedButton = dialog.showAndWait();
-            if (clickedButton.orElse(ButtonType.CANCEL) == ButtonType.APPLY) {
-                return controller.getProduct();
-            }
-
-            cancelEditProduct = true;
-
-            return initialValue;
-        } catch (NoSuchElementException e) {
-            //showNoProductSelectedAlert();
-            AlertDialog.alertWarning("No Selection", "No Product Selected", "Please select a product in the table.");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        throw new RuntimeException("Error while editing a product!");
-    }
-
-    void sortTableView(TableView<Product> expirationListTableView) {
-        FXCollections.sort(expirationListTableView.getItems(), Comparator.comparing(Product::getExpirationDate));
-    }
-
     boolean containsBlankItem() {
         List<Boolean> textFieldsStatus = shoppingListVBox.getChildren().stream().map(node -> {
             if (node instanceof GridPane gridPane) {
-                if (gridPane.getChildren().get(1) instanceof TextField textField)  {
+                if (gridPane.getChildren().get(1) instanceof TextField textField) {
                     return textField.getText().isBlank();
                 }
             }
@@ -267,14 +147,6 @@ public class MainWindowController {
 
         return textFieldsStatus.contains(true);
     }
-
-    /*
-
-
-    UI INTERACTION - LEFT (EXPIRATION LIST) VIEW
-
-
-     */
 
     @FXML
     void onDeleteExpirationListButtonClicked(ActionEvent ignoredEvent) {
@@ -293,8 +165,55 @@ public class MainWindowController {
             //showNoProductSelectedAlert();
             AlertDialog.alertWarning("No Selection", "No Product Selected", "Please select a product in the table.");
         }
+    }
 
+    /**
+     * Returns the index of the selected person in the TableView component
+     *
+     * @return the index of the selected person
+     */
+    int selectedIndex() throws NoSuchElementException {
+        int selectedIndex = expirationListTableView.getSelectionModel().getSelectedIndex();
+        if (selectedIndex < 0) {
+            throw new NoSuchElementException();
+        }
+        return selectedIndex;
+    }
 
+    void deleteCalendarEvent(Product product) {
+
+        String uid = product.getProductName() + product.getExpirationDate().toString();
+        ICalendar iCal = new ICalendar();
+        iCal.setMethod("CANCEL");
+        VEvent event = new VEvent();
+        event.setOrganizer(new Organizer("expirationdate", "")); //the organizer of the existing event
+        event.setUid(uid); //the UID of the existing event
+        event.setSequence(1);
+        event.setStatus(Status.cancelled());
+        Summary summary = event.setSummary(product.getProductName());
+        summary.setLanguage("en-us");
+
+        event.setDateStart(DateUtils.asDate(product.getExpirationDate()), false);
+
+        iCal.addEvent(event);
+
+        createExecuteICS(iCal);
+    }
+
+    void createExecuteICS(ICalendar iCalendar) {
+        File file = new File("temp.ics");
+        try (ICalWriter writer = new ICalWriter(file, ICalVersion.V2_0)) {
+            writer.write(iCalendar);
+        } catch (IOException e) {
+            new Alert(Alert.AlertType.ERROR, "Error during calendar event creation").showAndWait();
+        }
+
+        Desktop desktop = Desktop.getDesktop();
+        try {
+            desktop.open(file);
+        } catch (IOException e) {
+            new Alert(Alert.AlertType.ERROR, "Error while running calendar event").showAndWait();
+        }
     }
 
     void onEditExpirationDateColumn(TableColumn.CellEditEvent<Product, LocalDate> event) {
@@ -313,7 +232,6 @@ public class MainWindowController {
                 AlertDialog.alertError(onSQLExceptionMessage);
             }
         }
-
 
         sortTableView(expirationListTableView);
     }
@@ -335,6 +253,14 @@ public class MainWindowController {
             AlertDialog.alertError(onSQLExceptionMessage);
         }
     }
+
+    /*
+
+
+    UI INTERACTION - LEFT (EXPIRATION LIST) VIEW
+
+
+     */
 
     @FXML
     void onNewExpirationListButtonClicked(ActionEvent ignoredEvent) {
@@ -362,6 +288,71 @@ public class MainWindowController {
         sortTableView(expirationListTableView);
     }
 
+    public Product actionOnProduct(Product initialValue) {
+        try {
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(getClass().getResource("EditProduct-view.fxml"));
+            DialogPane view = loader.load();
+            EditProductController controller = loader.getController();
+
+            controller.setProduct(new Product(initialValue));
+
+            // Create the dialog
+            Dialog<ButtonType> dialog = new Dialog<>();
+            dialog.setTitle("Edit Product");
+            dialog.initModality(Modality.APPLICATION_MODAL);
+            dialog.setDialogPane(view);
+            //ImageView icon = new ImageView("com/napolitanoveroni/expirationdate/icons/app-icon.png");
+            Stage stage = (Stage) dialog.getDialogPane().getScene().getWindow();
+            stage.getIcons().add(new Image(Objects.requireNonNull(this.getClass().getResource("icons/app-icon.png")).toString()));
+
+            // Show the dialog and wait until the user closes it
+            Optional<ButtonType> clickedButton = dialog.showAndWait();
+            if (clickedButton.orElse(ButtonType.CANCEL) == ButtonType.APPLY) {
+                return controller.getProduct();
+            }
+
+            cancelEditProduct = true;
+
+            return initialValue;
+        } catch (NoSuchElementException e) {
+            //showNoProductSelectedAlert();
+            AlertDialog.alertWarning("No Selection", "No Product Selected", "Please select a product in the table.");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        throw new RuntimeException("Error while editing a product!");
+    }
+
+    void addCalendarEvent(Product product) {
+        ICalendar iCal = new ICalendar();
+        VEvent event = new VEvent();
+        Summary summary = event.setSummary(product.getProductName());
+        summary.setLanguage("en-us");
+
+        event.setDateStart(DateUtils.asDate(product.getExpirationDate()), false);
+
+        Duration triggerDuration = Duration.builder().prior(true).days(1).build();
+        Trigger trigger = new Trigger(triggerDuration, Related.START);
+        VAlarm alarm = VAlarm.display(trigger, product.getProductName() + " is expiring.");
+        event.addAlarm(alarm);
+
+        iCal.addEvent(event);
+
+        String uid = product.getProductName() + product.getExpirationDate().toString();
+
+        event.setOrganizer(new Organizer("expirationdate", ""));
+        event.setSequence(1);
+        event.setUid(uid);
+
+        createExecuteICS(iCal);
+    }
+
+    void sortTableView(TableView<Product> expirationListTableView) {
+        FXCollections.sort(expirationListTableView.getItems(), Comparator.comparing(Product::getExpirationDate));
+    }
+
     @FXML
     void onRecipesExpirationListButtonClicked(ActionEvent ignoredEvent) throws IOException {
 
@@ -372,19 +363,13 @@ public class MainWindowController {
 
         RecipeWindowController controller = fxmlLoader.getController();
 
-        controller.setNotExpiredProducts(
-                expirationList.stream()
-                        .filter(product -> product.getExpirationDate().isAfter(LocalDate.now()))
-                        .map(Product::getProductName)
-                        .collect(Collectors.toSet())
-        );
+        controller.setNotExpiredProducts(expirationList.stream().filter(product -> product.getExpirationDate().isAfter(LocalDate.now())).map(Product::getProductName).collect(Collectors.toSet()));
 
         stage.setTitle("Recipe");
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.setScene(scene);
 
-        scene.getWindow().addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST,
-                controller::onWindowCloseRequest);
+        scene.getWindow().addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST, controller::onWindowCloseRequest);
 
         stage.getIcons().add(new Image(Objects.requireNonNull(getClass().getResourceAsStream("icons/app-icon.png"))));
         stage.show();
@@ -431,8 +416,7 @@ public class MainWindowController {
             productTextField.setOnAction(this::onEnterShoppingTextField);
 
             deleteButton = new Button("");
-            ImageView imageView = new ImageView("com/napolitanoveroni/expirationdate/icons/white-delete-shoppingList" +
-                    "-icon.png");
+            ImageView imageView = new ImageView("com/napolitanoveroni/expirationdate/icons/white-delete-shoppingList" + "-icon.png");
             imageView.setFitWidth(25);
             imageView.setPreserveRatio(true);
             deleteButton.setGraphic(imageView);
@@ -444,7 +428,7 @@ public class MainWindowController {
 
             List<Boolean> checkBoxesStatus = shoppingListVBox.getChildren().stream().map(node -> {
                 if (node instanceof GridPane gridPane) {
-                    if (gridPane.getChildren().get(0) instanceof CheckBox checkBox)  {
+                    if (gridPane.getChildren().get(0) instanceof CheckBox checkBox) {
                         return checkBox.isSelected() && !checkBox.isIndeterminate();
                     }
                 }
@@ -466,7 +450,11 @@ public class MainWindowController {
         void onCheckBoxChecked(ActionEvent event) {
             if (event.getSource() instanceof CheckBox checkBox) {
                 int index = shoppingListVBox.getChildren().indexOf(checkBox.getParent());
+
                 if (!checkBox.isSelected() && !checkBox.isIndeterminate()) { //unchecked
+                    if (shoppingListVBox.getChildren().get(index) instanceof GridPane indexthGridPane) {
+                        indexthGridPane.getChildren().get(1).setDisable(false);
+                    }
                     shoppingListVBox.getChildren().get(index).toBack();
                 }
                 if (checkBox.isSelected() && !checkBox.isIndeterminate()) { //checked
@@ -480,8 +468,12 @@ public class MainWindowController {
                     if (shoppingListVBox.getChildren().get(index) instanceof GridPane indexthGridPane) {
                         if (indexthGridPane.getChildren().get(1) instanceof TextField textField) {
                             productName = textField.getText();
+                            if (productName.isBlank()) {
+                                checkBox.setSelected(false);
+                                return;
+                            }
                             productTextField = textField;
-                            productTextField.setDisable(true);
+                            productTextField.setDisable(checkBox.isSelected());
                             if (shoppingListVBox.getChildren().size() == 1) {
                                 new ShoppingListItemUI();
                             }
@@ -499,9 +491,8 @@ public class MainWindowController {
                             cancelEditProduct = false;
                             productTextField.setDisable(false);
                         }
-
                     } catch (SQLException e) {
-                        new Alert(Alert.AlertType.ERROR, "Database Error: while adding item").showAndWait();
+                        AlertDialog.alertError("Database Error: while adding item");
                     }
                 }
             }

@@ -10,6 +10,10 @@ import java.io.IOException;
 import java.util.Objects;
 
 public class ExpirationDateApplication extends Application {
+    public static void main(String[] args) {
+        launch();
+    }
+
     @Override
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(ExpirationDateApplication.class.getResource("MainWindow-view.fxml"));
@@ -18,9 +22,5 @@ public class ExpirationDateApplication extends Application {
         stage.setScene(scene);
         stage.getIcons().add(new Image(Objects.requireNonNull(getClass().getResourceAsStream("icons/app-icon.png"))));
         stage.show();
-    }
-
-    public static void main(String[] args) {
-        launch();
     }
 }

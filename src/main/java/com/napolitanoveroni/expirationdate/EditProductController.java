@@ -6,22 +6,17 @@ import javafx.scene.control.TextField;
 
 public class EditProductController {
 
+    Product product;
     @FXML
     private TextField categoryTextField;
-
     @FXML
     private DatePicker expirationDatePicker;
-
     @FXML
     private TextField nameTextField;
-
     @FXML
     private TextField priceTextField;
-
     @FXML
     private TextField quantityTextField;
-
-    Product product;
 
     @FXML
     public void initialize() {
@@ -44,12 +39,8 @@ public class EditProductController {
         expirationDatePicker.valueProperty().addListener((observable, oldValue, newValue) -> product.setExpirationDate(newValue));
     }
 
-    void update() {
-        nameTextField.textProperty().set(product.getProductName());
-        categoryTextField.textProperty().set(product.getCategoryName());
-        priceTextField.textProperty().set(Double.toString(product.getPrice()));
-        quantityTextField.textProperty().set(Integer.toString(product.getQuantity()));
-        expirationDatePicker.valueProperty().set(product.getExpirationDate());
+    public Product getProduct() {
+        return product;
     }
 
     public void setProduct(Product product) {
@@ -57,7 +48,11 @@ public class EditProductController {
         update();
     }
 
-    public Product getProduct() {
-        return product;
+    void update() {
+        nameTextField.textProperty().set(product.getProductName());
+        categoryTextField.textProperty().set(product.getCategoryName());
+        priceTextField.textProperty().set(Double.toString(product.getPrice()));
+        quantityTextField.textProperty().set(Integer.toString(product.getQuantity()));
+        expirationDatePicker.valueProperty().set(product.getExpirationDate());
     }
 }

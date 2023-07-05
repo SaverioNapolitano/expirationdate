@@ -31,54 +31,37 @@ import static com.napolitanoveroni.expirationdate.UtilsDB.*;
 
 public class RecipeWindowController {
 
+    int recipesIndex;
+    Set<String> notExpiredProducts;
+    Set<String> existingTags;
     @FXML
     private ComboBox<String> categoryComboBox;
-
     @FXML
     private TextField durationTextField;
-
     @FXML
     private VBox ingredientVBox;
-
     @FXML
     private ProgressIndicator ingredientsProgressIndicator;
-
     @FXML
     private TextField portionsTextField;
-
     @FXML
     private TextArea stepsTextArea;
-
     @FXML
     private GridPane tagGridPane;
-
     @FXML
     private TextField titleTextField;
-
     @FXML
     private ComboBox<String> unitComboBox;
-
     @FXML
     private Button leftButton;
-
     @FXML
     private Button rightButton;
-
     @FXML
     private MenuItem addMenuitem;
-
     private ObservableList<Recipe> recipes;
-    int recipesIndex;
-
     private int unitComboBoxSelected;
-
     private String categoryComboBoxSelected;
-
     private boolean suspendAutoSave;
-
-    Set<String> notExpiredProducts;
-
-    Set<String> existingTags;
 
     public void setNotExpiredProducts(Set<String> notExpiredProducts) {
         this.notExpiredProducts = notExpiredProducts;
@@ -86,6 +69,18 @@ public class RecipeWindowController {
         updateProgressIndicator(recipes.get(recipesIndex));
     }
 
+    void updateProgressIndicator(Recipe recipe) {
+        List<Ingredient> ingredients = recipe.getIngredientList();
+        double count = 0;
+
+        for (Ingredient ingredient : ingredients) {
+            if (notExpiredProducts.contains(ingredient.getIngredient())) {
+                count++;
+            }
+        }
+
+        ingredientsProgressIndicator.setProgress(count / ingredients.size());
+    }
 
     @FXML
     public void initialize() {
@@ -128,7 +123,7 @@ public class RecipeWindowController {
         initializeTimer();
     }
 
-    private void initializeTimer(){
+    private void initializeTimer() {
         AnimationTimer timer = new AnimationTimer() {
 
             private long lastUpdate = 0;
@@ -162,7 +157,7 @@ public class RecipeWindowController {
         stepsTextArea.setText(recipe.getSteps());
 
         tagGridPane.getChildren().remove(0, lastTagGridIndex());
-        GridPane.setConstraints(tagGridPane.getChildren().get(lastTagGridIndex()), 0,0);
+        GridPane.setConstraints(tagGridPane.getChildren().get(lastTagGridIndex()), 0, 0);
 
         List<String> tagsCopy = new ArrayList<>(recipe.getTagList());
         recipe.setTagList(new ArrayList<>());
@@ -199,25 +194,12 @@ public class RecipeWindowController {
         addMenuitem.setDisable(disable);
     }
 
-    void updateProgressIndicator(Recipe recipe) {
-        List<Ingredient> ingredients = recipe.getIngredientList();
-        double count = 0;
-
-        for (Ingredient ingredient : ingredients) {
-            if (notExpiredProducts.contains(ingredient.getIngredient())) {
-                count++;
-            }
-        }
-
-        ingredientsProgressIndicator.setProgress(count / ingredients.size());
-    }
-
     int lastTagGridIndex() {
         return tagGridPane.getChildren().size() - 1;
     }
 
     void insertTag(String tag) {
-        ComboBox<String> lastTag = (ComboBox<String>)tagGridPane.getChildren().get(lastTagGridIndex());
+        ComboBox<String> lastTag = (ComboBox<String>) tagGridPane.getChildren().get(lastTagGridIndex());
 
         lastTag.getEditor().setText(tag);
 
@@ -226,11 +208,11 @@ public class RecipeWindowController {
 
     @FXML
     void onEnterTagComboBox(ActionEvent event) {
-        if(suspendAutoSave){
+        if (suspendAutoSave) {
             return;
         }
 
-        ComboBox<String> comboBox = (ComboBox<String>)event.getSource();
+        ComboBox<String> comboBox = (ComboBox<String>) event.getSource();
         int index = tagGridPane.getChildren().indexOf(comboBox);
 
         Recipe recipe = recipes.get(recipesIndex);
@@ -269,7 +251,7 @@ public class RecipeWindowController {
             return;
         }
 
-        if (!((ComboBox<String>)(tagGridPane.getChildren().get(tagGridPane.getChildren().size() - 1))).getEditor().getText().isBlank()) {
+        if (!((ComboBox<String>) (tagGridPane.getChildren().get(tagGridPane.getChildren().size() - 1))).getEditor().getText().isBlank()) {
             int lastIndex = tagGridPane.getChildren().size();
             ComboBox<String> newComboBoxTag = new ComboBox<>();
             newComboBoxTag.setItems(FXCollections.observableArrayList(existingTags));
@@ -281,7 +263,7 @@ public class RecipeWindowController {
 
             tagGridPane.add(newComboBoxTag, columnIndex, rowIndex);
             newComboBoxTag.setOnAction(this::onEnterTagComboBox);
-            GridPane.setMargin(newComboBoxTag, new Insets(0,5,0,5));
+            GridPane.setMargin(newComboBoxTag, new Insets(0, 5, 0, 5));
         }
 
         try {
@@ -290,29 +272,27 @@ public class RecipeWindowController {
                 if (index < recipe.getTagList().size()) {
                     recipe.getTagList().remove(index);
                 }
-            } catch (SQLException ignored) {}
+            } catch (SQLException ignored) {
+            }
 
             insertDBTag(title, newTag);
             recipe.getTagList().add(index, newTag);
 
-
             //existingTags.add(newTag);
 
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             AlertDialog.alertError("Error while changing tags.");
         }
 
         try {
             existingTags = getAllTags();
             suspendAutoSave = true;
-            tagGridPane.getChildren().forEach(
-                    node -> {
-                        ComboBox<String> comboBox1 = (ComboBox<String>) node;
-                        if(!comboBox1.getItems().contains(newTag)){
-                            comboBox1.setItems(FXCollections.observableArrayList(existingTags));
-                        }
-                    });
+            tagGridPane.getChildren().forEach(node -> {
+                ComboBox<String> comboBox1 = (ComboBox<String>) node;
+                if (!comboBox1.getItems().contains(newTag)) {
+                    comboBox1.setItems(FXCollections.observableArrayList(existingTags));
+                }
+            });
             suspendAutoSave = false;
         } catch (SQLException e) {
             AlertDialog.alertError("Error while updating tags.");
@@ -353,7 +333,7 @@ public class RecipeWindowController {
         try {
             removeDBRecipe(recipes.get(recipesIndex).getTitle());
             recipes.remove(recipesIndex);
-            if(recipes.size() == 0){
+            if (recipes.size() == 0) {
                 initializeCreationView();
             } else {
                 recipesIndex %= recipes.size();
@@ -431,7 +411,7 @@ public class RecipeWindowController {
             return;
         }
 
-        if(recipes.stream().map(Recipe::getTitle).toList().contains(newTitle)){
+        if (recipes.stream().map(Recipe::getTitle).toList().contains(newTitle)) {
             suspendAutoSave = true;
             disableRecipeFields(true);
             return;
@@ -488,18 +468,18 @@ public class RecipeWindowController {
                 mapper.registerModule(new JavaTimeModule());
                 List<Recipe> recipeList = mapper.readValue(file, new TypeReference<>() {
                 });
-                for (ListIterator<Recipe> recipeListIterator = recipeList.listIterator(); recipeListIterator.hasNext();) {
+                for (ListIterator<Recipe> recipeListIterator = recipeList.listIterator(); recipeListIterator.hasNext(); ) {
                     Recipe recipe = recipeListIterator.next();
                     try {
                         insertDBRecipe(recipe);
-                    } catch (SQLIntegrityConstraintViolationException e){
+                    } catch (SQLIntegrityConstraintViolationException e) {
                         recipeListIterator.remove();
                     }
                 }
                 recipes.addAll(recipeList);
-                if(recipes.get(recipesIndex).getTitle().isBlank()){
+                if (recipes.get(recipesIndex).getTitle().isBlank()) {
                     recipes.remove(recipesIndex);
-                    recipesIndex%=recipes.size();
+                    recipesIndex %= recipes.size();
                     setRecipe(recipes.get(recipesIndex));
                 }
                 disableRecipeFields(false);
@@ -514,7 +494,7 @@ public class RecipeWindowController {
 
     @FXML
     void onLeftButtonClicked(ActionEvent ignoredEvent) {
-        if(recipesIndex - 1 < 0){
+        if (recipesIndex - 1 < 0) {
             recipesIndex = recipes.size() - 1;
         } else {
             recipesIndex--;
@@ -538,13 +518,13 @@ public class RecipeWindowController {
         try {
             editDBRecipeUnit(recipes.get(recipesIndex).getTitle(), unitComboBoxSelected);
             recipes.get(recipesIndex).setUnit(unitComboBoxSelected == 0 ? durationUnit.MIN : durationUnit.H);
-
         } catch (SQLException e) {
             AlertDialog.alertError("Error while updating unit");
         }
     }
-    void allFieldsAutoSave(){
-        if(titleTextField.getText().isBlank()){
+
+    void allFieldsAutoSave() {
+        if (titleTextField.getText().isBlank()) {
             return;
         }
         onEnterTitleTextField(new ActionEvent());
@@ -563,12 +543,17 @@ public class RecipeWindowController {
             }
         }
 
-        if(suspendAutoSave){
+        if (suspendAutoSave) {
             return;
         }
 
-        onEnterDurationTextField(new ActionEvent());
-        onEnterPortionsTextField(new ActionEvent());
+        if (!durationTextField.getText().isBlank()) {
+            onEnterDurationTextField(new ActionEvent());
+        }
+
+        if (!portionsTextField.getText().isBlank()) {
+            onEnterPortionsTextField(new ActionEvent());
+        }
         saveStepsTextArea();
 
         for (Node hBoxNode : ingredientVBox.getChildren()) {
@@ -576,7 +561,6 @@ public class RecipeWindowController {
                 for (Node node : hBox.getChildren()) {
                     if (node instanceof ComboBox<?> comboBox) {
                         comboBox.getOnAction().handle(new ActionEvent());
-
                     }
                 }
             }
@@ -587,8 +571,8 @@ public class RecipeWindowController {
     void saveStepsTextArea() {
         String steps = stepsTextArea.getText();
         Recipe recipe = recipes.get(recipesIndex);
-        if(!steps.equals(recipe.getSteps())){
-            try{
+        if (!steps.equals(recipe.getSteps())) {
+            try {
                 editDBRecipeSteps(recipe.getTitle(), steps);
                 recipe.setSteps(steps);
             } catch (SQLException e) {
@@ -621,6 +605,33 @@ public class RecipeWindowController {
         recipe.getIngredientList().add(ingredient);
     }
 
+    public void onWindowCloseRequest(WindowEvent event) {
+        if (suspendAutoSave) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.getButtonTypes().remove(ButtonType.OK);
+            alert.getButtonTypes().add(ButtonType.CANCEL);
+            alert.getButtonTypes().add(ButtonType.YES);
+            alert.setTitle("Quit application");
+            alert.setContentText("The current recipe already exists: do you want to cancel it and close?");
+            alert.initOwner((Window) event.getSource());
+            Optional<ButtonType> res = alert.showAndWait();
+
+            if (res.isPresent()) {
+                if (res.get().equals(ButtonType.CANCEL)) {
+                    event.consume();
+                } else {
+                    try {
+                        String oldTitle = recipes.get(recipesIndex).getTitle();
+                        removeDBRecipe(oldTitle);
+                        recipes.remove(recipesIndex);
+                    } catch (SQLException e) {
+                        AlertDialog.alertError("Error while removing recipe.");
+                    }
+                }
+            }
+        }
+    }
+
     private class IngredientUI {
         Ingredient ingredient;
         String recipeTitle;
@@ -630,23 +641,16 @@ public class RecipeWindowController {
         private ComboBox<String> unitComboBox;
         private Button deleteButton;
 
-        public void setRecipeTitle(String recipeTitle) {
-            this.recipeTitle = recipeTitle;
+        public IngredientUI(String recipeTitle, Ingredient ingredient) {
+            setRecipeTitle(recipeTitle);
+
+            initializeGraphics();
+
+            setIngredient(ingredient);
         }
 
-        public void setIngredient(Ingredient ingredient) {
-            this.ingredient = ingredient;
-            ingredientTextField.setText(ingredient.getIngredient());
-
-            quantityTextField.setText(Double.toString(ingredient.getQuantity()));
-
-            unitComboBox.getEditor().setText(ingredient.getUnit_of_measurement());
-
-            if (!ingredient.getIngredient().isBlank()) {
-                quantityTextField.setDisable(false);
-                unitComboBox.setDisable(false);
-                deleteButton.setDisable(false);
-            }
+        public void setRecipeTitle(String recipeTitle) {
+            this.recipeTitle = recipeTitle;
         }
 
         private void initializeGraphics() {
@@ -670,9 +674,7 @@ public class RecipeWindowController {
             unitComboBox = new ComboBox<>(FXCollections.observableArrayList("g", "kg", "ml", "l", "spoons"));
             unitComboBox.getEditor().setPromptText("Add unit of measurement...");
 
-
-            container = new HBox(ingredientTextField, quantityLabel, quantityTextField, unitLabel, unitComboBox
-                    , deleteButton);
+            container = new HBox(ingredientTextField, quantityLabel, quantityTextField, unitLabel, unitComboBox, deleteButton);
 
             ingredientTextField.setOnAction(this::onEnterIngredientTextField);
 
@@ -683,7 +685,6 @@ public class RecipeWindowController {
             unitComboBox.setEditable(true);
             unitComboBox.setOnAction(this::onEnterUnitComboBox);
 
-
             deleteButton.setDisable(true);
             deleteButton.setOnAction(this::onDeleteIngredientButtonClicked);
 
@@ -692,21 +693,24 @@ public class RecipeWindowController {
 
             VBox.setMargin(container, new Insets(5, 0, 5, 0));
 
-            HBox.setMargin(quantityLabel, new Insets(0,5,0,10));
-            HBox.setMargin(unitLabel, new Insets(0,5,0,10));
-            HBox.setMargin(deleteButton, new Insets(0,5,0,15));
+            HBox.setMargin(quantityLabel, new Insets(0, 5, 0, 10));
+            HBox.setMargin(unitLabel, new Insets(0, 5, 0, 10));
+            HBox.setMargin(deleteButton, new Insets(0, 5, 0, 15));
         }
 
-        public HBox getContainer() {
-            return container;
-        }
+        public void setIngredient(Ingredient ingredient) {
+            this.ingredient = ingredient;
+            ingredientTextField.setText(ingredient.getIngredient());
 
-        public IngredientUI(String recipeTitle, Ingredient ingredient) {
-            setRecipeTitle(recipeTitle);
+            quantityTextField.setText(Double.toString(ingredient.getQuantity()));
 
-            initializeGraphics();
+            unitComboBox.getEditor().setText(ingredient.getUnit_of_measurement());
 
-            setIngredient(ingredient);
+            if (!ingredient.getIngredient().isBlank()) {
+                quantityTextField.setDisable(false);
+                unitComboBox.setDisable(false);
+                deleteButton.setDisable(false);
+            }
         }
 
         void onEnterIngredientTextField(ActionEvent ignoredEvent) {
@@ -722,8 +726,8 @@ public class RecipeWindowController {
                     try {
                         removeDBIngredient(recipeTitle, ingredient);
                         ingredientList.remove(ingredient);
-                    } catch (SQLException ignored) {}
-
+                    } catch (SQLException ignored) {
+                    }
 
                     ingredient.setIngredient(newIngredient);
 
@@ -774,7 +778,6 @@ public class RecipeWindowController {
                     AlertDialog.alertError("Error, the quantity typed is not a decimal number");
                     quantityTextField.setText(Double.toString(ingredient.getQuantity()));
                 }
-
             }
         }
 
@@ -789,20 +792,6 @@ public class RecipeWindowController {
                 ingredient.setUnit_of_measurement(unit);
 
                 updateIngredient(ingredientIndex, ingredientList);
-            }
-        }
-
-        void updateIngredient(int ingredientIndex, List<Ingredient> ingredientList) {
-            try {
-                updateDBIngredient(recipeTitle, ingredient);
-
-                if (ingredientIndex != -1) {
-                    ingredientList.set(ingredientIndex, ingredient);
-                } else {
-                    ingredientList.add(ingredient);
-                }
-            } catch (SQLException e) {
-                AlertDialog.alertError("Error while updating ingredient");
             }
         }
 
@@ -821,33 +810,23 @@ public class RecipeWindowController {
                 }
             }
         }
-    }
 
-    public void onWindowCloseRequest(WindowEvent event){
-        if(suspendAutoSave){
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.getButtonTypes().remove(ButtonType.OK);
-            alert.getButtonTypes().add(ButtonType.CANCEL);
-            alert.getButtonTypes().add(ButtonType.YES);
-            alert.setTitle("Quit application");
-            alert.setContentText("The current recipe already exists: do you want to cancel it and close?");
-            alert.initOwner((Window) event.getSource());
-            Optional<ButtonType> res = alert.showAndWait();
+        void updateIngredient(int ingredientIndex, List<Ingredient> ingredientList) {
+            try {
+                updateDBIngredient(recipeTitle, ingredient);
 
-            if(res.isPresent()) {
-                if(res.get().equals(ButtonType.CANCEL)) {
-                    event.consume();
+                if (ingredientIndex != -1) {
+                    ingredientList.set(ingredientIndex, ingredient);
                 } else {
-                     try {
-                         String oldTitle = recipes.get(recipesIndex).getTitle();
-                        removeDBRecipe(oldTitle);
-                        recipes.remove(recipesIndex);
-                    } catch (SQLException e) {
-                        AlertDialog.alertError("Error while removing recipe.");
-                    }
-
+                    ingredientList.add(ingredient);
                 }
+            } catch (SQLException e) {
+                AlertDialog.alertError("Error while updating ingredient");
             }
+        }
+
+        public HBox getContainer() {
+            return container;
         }
     }
 }

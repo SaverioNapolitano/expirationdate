@@ -44,6 +44,11 @@ public class Ingredient {
     }
 
     @Override
+    public int hashCode() {
+        return Objects.hash(ingredient, quantity, unit_of_measurement);
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o)
             return true;
@@ -51,10 +56,5 @@ public class Ingredient {
             return false;
         Ingredient that = (Ingredient) o;
         return Double.compare(that.quantity, quantity) == 0 && Objects.equals(ingredient, that.ingredient) && Objects.equals(unit_of_measurement, that.unit_of_measurement);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(ingredient, quantity, unit_of_measurement);
     }
 }

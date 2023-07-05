@@ -14,16 +14,7 @@ public class Recipe {
     List<Ingredient> ingredientList;
     List<String> tagList;
 
-    public durationUnit getUnit() {
-        return unit;
-    }
-
-    public void setUnit(durationUnit unit) {
-        this.unit = unit;
-    }
-
-    public Recipe(String title, double duration, durationUnit unit, int portions, String category, String steps,
-                  List<Ingredient> ingredientList, List<String> tagList) {
+    public Recipe(String title, double duration, durationUnit unit, int portions, String category, String steps, List<Ingredient> ingredientList, List<String> tagList) {
         this.title = title;
         this.duration = duration;
         this.unit = unit;
@@ -68,8 +59,12 @@ public class Recipe {
         return duration;
     }
 
-    public void setDuration(double duration) {
-        this.duration = duration;
+    public durationUnit getUnit() {
+        return unit;
+    }
+
+    public void setUnit(durationUnit unit) {
+        this.unit = unit;
     }
 
     public int getPortions() {
@@ -112,6 +107,15 @@ public class Recipe {
         this.tagList = tagList;
     }
 
+    public void setDuration(double duration) {
+        this.duration = duration;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(title, duration, portions, category, steps, ingredientList, tagList);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o)
@@ -120,10 +124,5 @@ public class Recipe {
             return false;
         Recipe recipe = (Recipe) o;
         return duration == recipe.duration && portions == recipe.portions && Objects.equals(title, recipe.title) && Objects.equals(category, recipe.category) && Objects.equals(steps, recipe.steps) && Objects.equals(ingredientList, recipe.ingredientList) && Objects.equals(tagList, recipe.tagList);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(title, duration, portions, category, steps, ingredientList, tagList);
     }
 }
