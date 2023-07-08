@@ -1,3 +1,7 @@
+/**
+ * Utility class for interacting with the database.
+ */
+
 package com.napolitanoveroni.expirationdate;
 
 import com.zaxxer.hikari.HikariConfig;
@@ -14,6 +18,12 @@ import java.util.*;
 public class UtilsDB {
 	static private HikariDataSource dataSource;
 
+	/**
+	 * Establishes a connection to the database.
+	 *
+	 * @throws SQLException if a database access error occurs.
+	 */
+
 	static void dbConnection() throws SQLException {
 		HikariConfig config = new HikariConfig();
 		config.setDriverClassName(PersonalConfigDB.JDBC_Driver);
@@ -21,6 +31,13 @@ public class UtilsDB {
 		config.setLeakDetectionThreshold(2000);
 		dataSource = new HikariDataSource(config);
 	}
+
+	/**
+	 * Retrieves product data from the database.
+	 *
+	 * @return an observable list of products.
+	 * @throws SQLException if a database access error occurs.
+	 */
 
 	static ObservableList<Product> getProductData() throws SQLException {
 		ObservableList<Product> products = FXCollections.observableArrayList();
@@ -34,10 +51,24 @@ public class UtilsDB {
 		return products;
 	}
 
+	/**
+	 * Converts an SQL date to a LocalDate object.
+	 *
+	 * @param SQLDate the SQL date to be converted.
+	 * @return the converted LocalDate object.
+	 */
+
 	public static LocalDate convertSQLDateToLocalDate(Date SQLDate) {
 		java.util.Date date = new java.util.Date(SQLDate.getTime());
 		return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 	}
+
+	/**
+	 * Retrieves recipe data from the database.
+	 *
+	 * @return an observable list of recipes.
+	 * @throws SQLException if a database access error occurs.
+	 */
 
 	static ObservableList<Recipe> getRecipeData() throws SQLException {
 		ObservableList<Recipe> returnValue = FXCollections.observableArrayList();
@@ -84,6 +115,15 @@ public class UtilsDB {
 		return returnValue;
 	}
 
+	/**
+	 * Edits the product name in the database.
+	 *
+	 * @param oldProduct the old product object.
+	 * @param newName    the new name of the product.
+	 * @param main       the main window controller.
+	 * @throws SQLException if a database access error occurs.
+	 */
+
 	static void editDBProductName(Product oldProduct, String newName, MainWindowController main) throws SQLException {
 
 		try (Connection connection = dataSource.getConnection(); PreparedStatement updateProduct = connection.prepareStatement("UPDATE products SET " + "productName=?" + " WHERE productName=?" + " AND " + "expirationDate=?")) {
@@ -94,11 +134,28 @@ public class UtilsDB {
 		}
 	}
 
+	/**
+	 * Updates the product information in the database.
+	 *
+	 * @param product       the product object to be updated.
+	 * @param updateProduct the prepared statement for updating the product.
+	 * @throws SQLException if a database access error occurs.
+	 */
+
 	static void productDBUpdate(Product product, PreparedStatement updateProduct) throws SQLException {
 		updateProduct.setString(2, product.getProductName());
 		updateProduct.setDate(3, Date.valueOf(product.getExpirationDate()));
 		updateProduct.executeUpdate();
 	}
+
+	/**
+	 * Edits all fields of a product in the database.
+	 *
+	 * @param oldProduct the old product object.
+	 * @param newProduct the new product object.
+	 * @param main       the main window controller.
+	 * @throws SQLException if a database access error occurs.
+	 */
 
 	static void editDBProductAllField(Product oldProduct, Product newProduct, MainWindowController main) throws
 		SQLException {
@@ -116,12 +173,27 @@ public class UtilsDB {
 		}
 	}
 
+	/**
+	 * Edits the quantity of a product in the database.
+	 *
+	 * @param product     the product object.
+	 * @param newQuantity the new quantity of the product.
+	 * @throws SQLException if a database access error occurs.
+	 */
+
 	static void editDBProductQuantity(Product product, int newQuantity) throws SQLException {
 		try (Connection connection = dataSource.getConnection(); PreparedStatement updateProduct = connection.prepareStatement("UPDATE products SET " + "quantity=?" + " WHERE productName=?" + " AND " + "expirationDate=?")) {
 			updateProduct.setInt(1, newQuantity);
 			productDBUpdate(product, updateProduct);
 		}
 	}
+
+	/**
+	 * Inserts a new product into the database.
+	 *
+	 * @param product the product object to be inserted.
+	 * @throws SQLException if a database access error occurs.
+	 */
 
 	static void insertDBProduct(Product product) throws SQLException {
 		try (Connection connection = dataSource.getConnection(); PreparedStatement insertProduct = connection.prepareStatement("INSERT INTO products (productName, " + "expirationDate, " + "categoryName, " + "quantity, price) VALUES (?, ?, ?, ?, ?)")) {
@@ -134,6 +206,13 @@ public class UtilsDB {
 		}
 	}
 
+	/**
+	 * Removes a product from the database.
+	 *
+	 * @param product the product object to be removed.
+	 * @throws SQLException if a database access error occurs.
+	 */
+
 	static void removeDBProduct(Product product) throws SQLException {
 		try (Connection connection = dataSource.getConnection(); PreparedStatement deleteProduct = connection.prepareStatement("DELETE FROM products WHERE productName=? " + "AND expirationDate=?")) {
 			deleteProduct.setString(1, product.getProductName());
@@ -142,6 +221,14 @@ public class UtilsDB {
 		}
 	}
 
+	/**
+	 * Removes a tag from a recipe in the database.
+	 *
+	 * @param title the title of the recipe.
+	 * @param tag   the tag to be removed.
+	 * @throws SQLException if a database access error occurs.
+	 */
+
 	static void removeDBTag(String title, String tag) throws SQLException {
 		try (Connection connection = dataSource.getConnection(); PreparedStatement deleteTag = connection.prepareStatement("DELETE FROM tag WHERE title=? " + "AND tag=?")) {
 			deleteTag.setString(1, title);
@@ -149,6 +236,14 @@ public class UtilsDB {
 			deleteTag.executeUpdate();
 		}
 	}
+
+	/**
+	 * Edits the category of a recipe in the database.
+	 *
+	 * @param title    the title of the recipe.
+	 * @param category the new category of the recipe.
+	 * @throws SQLException if a database access error occurs.
+	 */
 
 	static void editDBRecipeCategory(String title, String category) throws SQLException {
 
@@ -161,6 +256,14 @@ public class UtilsDB {
 		}
 	}
 
+	/**
+	 * Edits the unit of a recipe in the database.
+	 *
+	 * @param title the title of the recipe.
+	 * @param unit  the new unit of the recipe.
+	 * @throws SQLException if a database access error occurs.
+	 */
+
 	static void editDBRecipeUnit(String title, int unit) throws SQLException {
 
 		try (Connection connection = dataSource.getConnection(); PreparedStatement updateRecipe = connection.prepareStatement("UPDATE recipe SET " + "unit=?" + " WHERE title=?")) {
@@ -171,6 +274,14 @@ public class UtilsDB {
 
 		}
 	}
+
+	/**
+	 * Edits the duration of a recipe in the database.
+	 *
+	 * @param title    the title of the recipe.
+	 * @param duration the new duration of the recipe.
+	 * @throws SQLException if a database access error occurs.
+	 */
 
 	static void editDBRecipeDuration(String title, double duration) throws SQLException {
 
@@ -183,6 +294,14 @@ public class UtilsDB {
 		}
 	}
 
+	/**
+	 * Edits the portion size of a recipe in the database.
+	 *
+	 * @param title    the title of the recipe.
+	 * @param portions the new portion size of the recipe.
+	 * @throws SQLException if a database access error occurs.
+	 */
+
 	static void editDBRecipePortion(String title, int portions) throws SQLException {
 
 		try (Connection connection = dataSource.getConnection(); PreparedStatement updateRecipe = connection.prepareStatement("UPDATE recipe SET " + "portions=?" + " WHERE title=?")) {
@@ -194,6 +313,14 @@ public class UtilsDB {
 		}
 	}
 
+	/**
+	 * Edits the steps of a recipe in the database.
+	 *
+	 * @param title the title of the recipe.
+	 * @param steps the new steps of the recipe.
+	 * @throws SQLException if a database access error occurs.
+	 */
+
 	static void editDBRecipeSteps(String title, String steps) throws SQLException {
 
 		try (Connection connection = dataSource.getConnection(); PreparedStatement updateRecipe = connection.prepareStatement("UPDATE recipe SET " + "steps=?" + " WHERE title=?")) {
@@ -204,6 +331,13 @@ public class UtilsDB {
 
 		}
 	}
+
+	/**
+	 * Removes a recipe from the database.
+	 *
+	 * @param title the title of the recipe to be removed.
+	 * @throws SQLException if a database access error occurs.
+	 */
 
 	static void removeDBRecipe(String title) throws SQLException {
 		try (Connection connection = dataSource.getConnection(); PreparedStatement removeRecipe = connection.prepareStatement("DELETE FROM TAG " + " WHERE title=?")) {
@@ -227,6 +361,13 @@ public class UtilsDB {
 
 		}
 	}
+
+	/**
+	 * Inserts a new recipe into the database.
+	 *
+	 * @param recipe the recipe object to be inserted.
+	 * @throws SQLException if a database access error occurs.
+	 */
 
 	static void insertDBRecipe(Recipe recipe) throws SQLException {
 		String title = recipe.getTitle();
@@ -253,6 +394,14 @@ public class UtilsDB {
 		}
 	}
 
+	/**
+	 * Inserts a new ingredient into the database for a specific recipe.
+	 *
+	 * @param title      the title of the recipe.
+	 * @param ingredient the ingredient object to be inserted.
+	 * @throws SQLException if a database access error occurs.
+	 */
+
 	static void insertDBIngredient(String title, Ingredient ingredient) throws SQLException {
 		try (Connection connection = dataSource.getConnection(); PreparedStatement insertIngredient = connection.prepareStatement("INSERT INTO CONSIST (title, ingredient, quantity, unit_of_measurement) VALUES " + "(?,?,?,?)")) {
 			insertIngredient.setString(1, title);
@@ -263,6 +412,14 @@ public class UtilsDB {
 		}
 	}
 
+	/**
+	 * Inserts a new tag into the database for a specific recipe.
+	 *
+	 * @param title the title of the recipe.
+	 * @param tag   the tag to be inserted.
+	 * @throws SQLException if a database access error occurs.
+	 */
+
 	static void insertDBTag(String title, String tag) throws SQLException {
 		try (Connection connection = dataSource.getConnection(); PreparedStatement insertTag = connection.prepareStatement("INSERT INTO tag (title, tag) VALUES (?, ?)")) {
 			insertTag.setString(1, title);
@@ -270,6 +427,14 @@ public class UtilsDB {
 			insertTag.executeUpdate();
 		}
 	}
+
+	/**
+	 * Updates an existing ingredient in the database for a specific recipe.
+	 *
+	 * @param title      the title of the recipe.
+	 * @param ingredient the updated ingredient object.
+	 * @throws SQLException if a database access error occurs.
+	 */
 
 	static void updateDBIngredient(String title, Ingredient ingredient) throws SQLException {
 		try (Connection connection = dataSource.getConnection(); PreparedStatement insertIngredient = connection.prepareStatement("UPDATE CONSIST SET quantity=?, unit_of_measurement=? WHERE title=? AND ingredient=?")) {
@@ -281,6 +446,13 @@ public class UtilsDB {
 		}
 	}
 
+	/**
+	 * Removes an ingredient from the database for a specific recipe.
+	 *
+	 * @param title      the title of the recipe.
+	 * @param ingredient the ingredient to be removed.
+	 * @throws SQLException if a database access error occurs.
+	 */
 	static void removeDBIngredient(String title, Ingredient ingredient) throws SQLException {
 		try (Connection connection = dataSource.getConnection(); PreparedStatement deleteIngredient = connection.prepareStatement("DELETE FROM CONSIST WHERE title=? AND ingredient=?")) {
 			deleteIngredient.setString(1, title);
@@ -288,6 +460,13 @@ public class UtilsDB {
 			deleteIngredient.executeUpdate();
 		}
 	}
+
+	/**
+	 * Retrieves all tags from the database.
+	 *
+	 * @return a set of tags.
+	 * @throws SQLException if a database access error occurs.
+	 */
 
 	static Set<String> getAllTags() throws SQLException {
 		Set<String> tags = new HashSet<>();
