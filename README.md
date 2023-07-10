@@ -1,4 +1,4 @@
-![](src/main/resources/com/napolitanoveroni/expirationdate/icons/app-icon.png)
+![](readme-images/readme-title-banner.png)
 
 This application was designed to help people manage their food-related issues.
 
