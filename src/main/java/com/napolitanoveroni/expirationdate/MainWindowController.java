@@ -1,3 +1,13 @@
+/**
+ * The MainWindowController class is responsible for handling user interactions and managing the main window of the application.
+ * <p>This controller is associated with the MainWindow-view.fxml file, which defines the layout of the main window.</p>
+ * <p>The controller handles actions related to the expiration list and the shopping list views, including adding and editing products,
+ * deleting products, updating the calendar events, and managing the UI elements.</p>
+ * <p>Note: This class assumes the usage of external libraries, such as biweekly and JavaFX.</p>
+ * <p>Note: This class depends on the UtilsDB and AlertDialog classes.</p>
+ * <p>Note: This class assumes the existence of the Product, EditProductController, and RecipeWindowController classes.</p>
+ */
+
 package com.napolitanoveroni.expirationdate;
 
 import biweekly.ICalVersion;
@@ -46,6 +56,12 @@ import java.util.stream.Collectors;
 
 import static com.napolitanoveroni.expirationdate.UtilsDB.*;
 
+/**
+ * The MainWindowController class is responsible for handling user interactions and managing the main window of the application.
+ *
+ * @author SaverioNapolitano, MatteV02
+ * @version 2023.07.10
+ */
 public class MainWindowController {
 
 	ObservableList<Product> expirationList;
@@ -69,6 +85,10 @@ public class MainWindowController {
 
      */
 
+	/**
+	 * Initializes the controller and sets up the expiration list view.
+	 * This method is automatically called by the JavaFX framework after loading the associated FXML file.
+	 */
 	@FXML
 	public void initialize() {
 		expirationListProductColumn.setCellValueFactory(new PropertyValueFactory<>("productName"));
@@ -90,6 +110,9 @@ public class MainWindowController {
 		new ShoppingListItemUI();
 	}
 
+	/**
+	 * Sets up editable columns in the expiration list table.
+	 */
 	private void editableCols() {
 		expirationListProductColumn.setCellFactory(TextFieldTableCell.forTableColumn());
 		expirationListProductColumn.setOnEditCommit(this::onEditProductColumn);
@@ -107,6 +130,12 @@ public class MainWindowController {
 
      */
 
+	/**
+	 * Edits the calendar event for the given old product and new product.
+	 *
+	 * @param oldProduct The old product.
+	 * @param newProduct The new product.
+	 */
 	void editCalendarEvent(Product oldProduct, Product newProduct) {
 		//TODO: see https://datatracker.ietf.org/doc/html/rfc5546#page-80 for updating an existing event
 		deleteCalendarEvent(oldProduct);
@@ -118,6 +147,13 @@ public class MainWindowController {
 		addCalendarEvent(newProduct);
 	}
 
+	/**
+	 * Handles the case when there are overlapping products with the same name and expiration date.
+	 *
+	 * @param oldProduct        The old product.
+	 * @param newName           The new name.
+	 * @param newExpirationDate The new expiration date.
+	 */
 	void onOverlappingProducts(Product oldProduct, String newName, LocalDate newExpirationDate) {
 		final String onSQLExceptionMessage = "Database Error while editing item";
 
@@ -135,6 +171,11 @@ public class MainWindowController {
 		});
 	}
 
+	/**
+	 * Checks if there is a blank item in the shopping list.
+	 *
+	 * @return {@code true} if there is a blank item, {@code false} otherwise.
+	 */
 	boolean containsBlankItem() {
 		List<Boolean> textFieldsStatus = shoppingListVBox.getChildren().stream().map(node -> {
 			if (node instanceof GridPane gridPane) {
@@ -148,6 +189,11 @@ public class MainWindowController {
 		return textFieldsStatus.contains(true);
 	}
 
+	/**
+	 * Handles the event when the "Delete" button in the expiration list is clicked.
+	 *
+	 * @param ignoredEvent The action event (ignored).
+	 */
 	@FXML
 	void onDeleteExpirationListButtonClicked(ActionEvent ignoredEvent) {
 		try {
@@ -171,6 +217,8 @@ public class MainWindowController {
 	 * Returns the index of the selected person in the TableView component
 	 *
 	 * @return the index of the selected person
+	 *
+	 * @throws NoSuchElementException If no selection is made.
 	 */
 	int selectedIndex() throws NoSuchElementException {
 		int selectedIndex = expirationListTableView.getSelectionModel().getSelectedIndex();
@@ -180,6 +228,11 @@ public class MainWindowController {
 		return selectedIndex;
 	}
 
+	/**
+	 * Deletes the calendar event for the given product.
+	 *
+	 * @param product The product.
+	 */
 	void deleteCalendarEvent(Product product) {
 
 		String uid = product.getProductName() + product.getExpirationDate().toString();
@@ -200,6 +253,11 @@ public class MainWindowController {
 		createExecuteICS(iCal);
 	}
 
+	/**
+	 * Creates and executes an ICS (iCalendar) file.
+	 *
+	 * @param iCalendar The iCalendar data.
+	 */
 	void createExecuteICS(ICalendar iCalendar) {
 		File file = new File("temp.ics");
 		try (ICalWriter writer = new ICalWriter(file, ICalVersion.V2_0)) {
@@ -216,6 +274,11 @@ public class MainWindowController {
 		}
 	}
 
+	/**
+	 * Edits the calendar event for the given old product and new product.
+	 *
+	 * @param event The cell edit event.
+	 */
 	void onEditExpirationDateColumn(TableColumn.CellEditEvent<Product, LocalDate> event) {
 		final String onSQLExceptionMessage = "Database Error while editing item";
 
@@ -236,6 +299,11 @@ public class MainWindowController {
 		sortTableView(expirationListTableView);
 	}
 
+	/**
+	 * Edits the product column based on the new value.
+	 *
+	 * @param event The cell edit event.
+	 */
 	void onEditProductColumn(TableColumn.CellEditEvent<Product, String> event) {
 		final String onSQLExceptionMessage = "Database Error while editing item";
 
@@ -262,6 +330,15 @@ public class MainWindowController {
 
      */
 
+	/**
+	 * Handles the event when the "New Expiration List" button is clicked.
+	 * Creates a new product and opens the edit dialog to modify the product details.
+	 * If the product is valid (not empty), it is added to the expiration list and the database.
+	 * If a product with the same name and expiration date already exists in the list, the quantities are updated.
+	 * Finally, the expiration list table is sorted.
+	 *
+	 * @param ignoredEvent The action event (ignored).
+	 */
 	@FXML
 	void onNewExpirationListButtonClicked(ActionEvent ignoredEvent) {
 		Product edited = actionOnProduct(new Product());
@@ -288,6 +365,16 @@ public class MainWindowController {
 		sortTableView(expirationListTableView);
 	}
 
+	/**
+	 * Opens the edit product dialog for the given initial product value.
+	 * Allows the user to modify the product details.
+	 *
+	 * @param initialValue The initial value of the product.
+	 *
+	 * @return The edited product if the user applies the changes, otherwise returns the initial product.
+	 *
+	 * @throws RuntimeException If an error occurs during editing a product.
+	 */
 	public Product actionOnProduct(Product initialValue) {
 		try {
 			FXMLLoader loader = new FXMLLoader();
@@ -325,6 +412,13 @@ public class MainWindowController {
 		throw new RuntimeException("Error while editing a product!");
 	}
 
+	/**
+	 * Adds a calendar event for the given product.
+	 * The event includes the product name, expiration date, and an alarm for one day before the expiration date.
+	 * The calendar event is stored in an iCalendar object and then executed.
+	 *
+	 * @param product The product for which to create the calendar event.
+	 */
 	void addCalendarEvent(Product product) {
 		ICalendar iCal = new ICalendar();
 		VEvent event = new VEvent();
@@ -349,10 +443,23 @@ public class MainWindowController {
 		createExecuteICS(iCal);
 	}
 
+	/**
+	 * Sorts the expiration list table based on the expiration dates of the products.
+	 *
+	 * @param expirationListTableView The table view to be sorted.
+	 */
 	void sortTableView(TableView<Product> expirationListTableView) {
 		FXCollections.sort(expirationListTableView.getItems(), Comparator.comparing(Product::getExpirationDate));
 	}
 
+	/**
+	 * Handles the event when the "Recipes" button in the expiration list view is clicked.
+	 * Opens the recipe window and passes the names of the non-expired products to the controller.
+	 *
+	 * @param ignoredEvent The action event (ignored).
+	 *
+	 * @throws IOException If an error occurs while loading the recipe window.
+	 */
 	@FXML
 	void onRecipesExpirationListButtonClicked(ActionEvent ignoredEvent) throws IOException {
 
@@ -383,6 +490,13 @@ public class MainWindowController {
 
      */
 
+	/**
+	 * Handles the event when the "Clear" button is clicked in the shopping list view.
+	 * Removes the selected items from the shopping list.
+	 * If the shopping list becomes empty, a new blank item is added.
+	 *
+	 * @param ignoredEvent The action event (ignored).
+	 */
 	@FXML
 	void onClearButtonClicked(ActionEvent ignoredEvent) {
 		ObservableList<Node> children = shoppingListVBox.getChildren();
@@ -401,12 +515,24 @@ public class MainWindowController {
 		}
 	}
 
+	/**
+	 * Represents a shopping list item in the UI.
+	 * Contains a checkbox, a text field, and a delete button for each item.
+	 * Provides methods to handle events associated with the shopping list item.
+	 */
+
 	private class ShoppingListItemUI {
 		GridPane container;
 		CheckBox productCheckBox;
 		TextField productTextField;
 		Button deleteButton;
 
+		/**
+		 * Creates a new shopping list item UI component.
+		 * Initializes the checkbox, text field, and delete button.
+		 * Adds the UI component to the shopping list view.
+		 * Sets the focus on the text field.
+		 */
 		public ShoppingListItemUI() {
 			productCheckBox = new CheckBox();
 			productCheckBox.setOnAction(this::onCheckBoxChecked);
@@ -446,6 +572,14 @@ public class MainWindowController {
 
 			productTextField.requestFocus();
 		}
+
+		/**
+		 * Handles the event when the checkbox of the shopping list item is checked or unchecked.
+		 * Moves the item to the front or back based on its checked status.
+		 * If the checkbox is checked, creates a new shopping list item if all existing items are filled.
+		 *
+		 * @param event The action event triggered by the checkbox.
+		 */
 
 		@FXML
 		void onCheckBoxChecked(ActionEvent event) {
@@ -501,12 +635,26 @@ public class MainWindowController {
 			sortTableView(expirationListTableView);
 		}
 
+		/**
+		 * Handles the event when the Enter key is pressed in the shopping list item's text field.
+		 * Adds a new shopping list item if all existing items are filled and the current item is not blank.
+		 *
+		 * @param event The action event triggered by the Enter key press.
+		 */
 		@FXML
 		void onEnterShoppingTextField(ActionEvent event) {
 			if (!containsBlankItem()) {
 				new ShoppingListItemUI();
 			}
 		}
+
+		/**
+		 * Handles the event when the delete button of the shopping list item is clicked.
+		 * Removes the shopping list item from the UI.
+		 * Adds a new shopping list item if all existing items are filled or deleted.
+		 *
+		 * @param event The action event triggered by the delete button click.
+		 */
 
 		@FXML
 		void onDeleteShoppingListButtonClicked(ActionEvent event) {

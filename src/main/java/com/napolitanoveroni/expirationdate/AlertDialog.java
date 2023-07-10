@@ -4,8 +4,21 @@ import javafx.geometry.NodeOrientation;
 import javafx.scene.control.Alert;
 import javafx.scene.image.ImageView;
 
+/**
+ * The AlertDialog class provides static methods to display alert dialogs with different types and styles.
+ *
+ * @author SaverioNapolitano, MatteV02
+ * @version 2023.07.10
+ */
 public class AlertDialog {
 
+	/**
+	 * Displays a warning alert dialog with the specified title, header, and content.
+	 *
+	 * @param title   the title of the alert dialog
+	 * @param header  the header text of the alert dialog
+	 * @param content the content text of the alert dialog
+	 */
 	public static void alertWarning(String title, String header, String content) {
 		Alert alert = new Alert(Alert.AlertType.WARNING);
 
@@ -25,6 +38,11 @@ public class AlertDialog {
 		alert.show();
 	}
 
+	/**
+	 * Displays an error alert dialog with the specified error message.
+	 *
+	 * @param message the error message to be displayed in the alert dialog
+	 */
 	public static void alertError(String message) {
 		Alert alert = new Alert(Alert.AlertType.ERROR, message);
 
