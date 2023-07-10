@@ -1,8 +1,3 @@
-/**
- * The RecipeWindowController class is responsible for managing the recipe window
- * and handling user interactions with the GUI components.
- */
-
 package com.napolitanoveroni.expirationdate;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -33,6 +28,15 @@ import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.*;
 
 import static com.napolitanoveroni.expirationdate.UtilsDB.*;
+
+/**
+ * The RecipeWindowController class is responsible for managing the recipe window
+ * and handling user interactions with the GUI components.
+ *
+ * @author SaverioNapolitano, MatteV02
+ * @version 2023.07.10
+ */
+
 
 public class RecipeWindowController {
 
