@@ -48,3 +48,11 @@ The application consists of 2 main views:
 - JSON import/export: [jackson-core](https://github.com/FasterXML/jackson-core), [jackson-databind](https://github.com/FasterXML/jackson-annotations), [jackson-datatype](https://github.com/FasterXML/jackson-databind)
 - Database: [MySQL](https://www.mysql.com/), [HikariCP](https://mvnrepository.com/artifact/com.zaxxer/HikariCP)
 - Icons: [icons8](https://icons8.com), [the noun project](https://thenounproject.com)
+	- Calendar by David Khai from <a href="https://thenounproject.com/browse/icons/term/calendar/" target="_blank" title="Calendar Icons">Noun Project</a>
+ 	- add by Jony from <a href="https://thenounproject.com/browse/icons/term/add/" target="_blank" title="add Icons">Noun Project</a>
+  	- Arrow by Alice Design from <a href="https://thenounproject.com/browse/icons/term/arrow/" target="_blank" title="Arrow Icons">Noun Project</a>
+   	- Alert by Nursila from <a href="https://thenounproject.com/browse/icons/term/alert/" target="_blank" title="Alert Icons">Noun Project</a>
+	- Delete by Landan Lloyd from <a href="https://thenounproject.com/browse/icons/term/delete/" target="_blank" title="Delete Icons">Noun Project</a>
+	- bin by Alice Design from <a href="https://thenounproject.com/browse/icons/term/bin/" target="_blank" title="bin Icons">Noun Project</a>
+  	- Cross by AliWijaya from <a href="https://thenounproject.com/browse/icons/term/cross/" target="_blank" title="Cross Icons">Noun Project</a>
+	- add by AliWijaya from <a href="https://thenounproject.com/browse/icons/term/add/" target="_blank" title="add Icons">Noun Project</a>
