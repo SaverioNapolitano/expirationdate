@@ -1,13 +1,16 @@
-/**
- * The Recipe class represents a recipe with various properties such as title, duration, portions, category, steps,
- * ingredient list, and tag list.
- */
-
 package com.napolitanoveroni.expirationdate;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+/**
+ * The Recipe class represents a recipe with various properties such as title, duration, portions, category, steps,
+ * ingredient list, and tag list.
+ *
+ * @author SaverioNapolitano
+ * @version 2023.07.10
+ */
 
 public class Recipe {
 	String title;

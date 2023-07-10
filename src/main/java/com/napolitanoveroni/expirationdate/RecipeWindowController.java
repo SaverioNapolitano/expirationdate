@@ -343,8 +343,6 @@ public class RecipeWindowController {
 			insertDBTag(title, newTag);
 			recipe.getTagList().add(index, newTag);
 
-			//existingTags.add(newTag);
-
 		} catch (SQLException e) {
 			AlertDialog.alertError("Error while changing tags.");
 		}
@@ -502,7 +500,6 @@ public class RecipeWindowController {
 			editDBRecipePortion(recipe.getTitle(), newPortions);
 			recipe.setPortions(newPortions);
 		} catch (NumberFormatException e) {
-			//new Alert(Alert.AlertType.ERROR, "What you typed wasn't an integer number").show();
 			AlertDialog.alertError("What you typed wasn't an integer number");
 			portionsTextField.setText(Integer.toString(recipe.getPortions()));
 		} catch (SQLException e) {

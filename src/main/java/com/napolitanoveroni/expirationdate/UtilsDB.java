@@ -1,7 +1,3 @@
-/**
- * Utility class for interacting with the database.
- */
-
 package com.napolitanoveroni.expirationdate;
 
 import com.zaxxer.hikari.HikariConfig;
@@ -14,6 +10,12 @@ import java.sql.*;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
+
+/**
+ * Utility class for interacting with the database.
+ * @author SaverioNapolitano, MatteV02
+ * @version 2023.07.10
+ */
 
 public class UtilsDB {
 	static private HikariDataSource dataSource;
